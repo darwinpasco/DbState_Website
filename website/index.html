@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="DbState helps engineering teams validate database state, detect schema drift, and trust source-controlled database artifacts."
+    />
+    <title>DbState | Database state you can trust</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <script>
+      window.DBSTATE_CONFIG = {
+        privateBetaFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdXH4OsaO4l_4yLDZAeHYojzuHsb52hdu1oZ0Bh58un4kqqPQ/viewform",
+        demoVideoEmbedUrl: "https://www.youtube-nocookie.com/embed/FWAx0pdMLfQ",
+      };
+    </script>
+
+    <header class="page-shell hero">
+      <p class="eyebrow">Private beta</p>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1>DbState makes your database explainable.</h1>
+          <p class="lead">
+            Validate database state, detect schema drift, and prove that your database can be rebuilt from
+            source-controlled artifacts.
+          </p>
+          <div class="cta-row">
+            <a id="primary-cta" class="button button-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSdXH4OsaO4l_4yLDZAeHYojzuHsb52hdu1oZ0Bh58un4kqqPQ/viewform">Request Private Beta Access</a>
+          </div>
+        </div>
+        <aside class="hero-panel">
+          <p class="panel-label">What DbState helps teams do</p>
+          <ul>
+            <li>Validate database state against source-controlled artifacts</li>
+            <li>Spot drift before it becomes a release or audit problem</li>
+            <li>Rebuild confidently from deterministic database state files</li>
+          </ul>
+        </aside>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-shell demo-section">
+        <div class="card demo-card">
+          <div class="section-heading">
+            <h2>See DbState in action</h2>
+            <p>Watch a short demo of the DbState workflow.</p>
+          </div>
+          <div class="video-frame">
+            <iframe
+              id="demo-video"
+              title="DbState demo video"
+              src="https://www.youtube-nocookie.com/embed/FWAx0pdMLfQ"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="page-shell section-grid">
+        <article class="card">
+          <h2>Your repository says one thing. Your database may say another.</h2>
+          <p>
+            Database drift is easy to miss and expensive to fix. Local databases get patched manually. Staging falls
+            behind production. Rebuild scripts rot. Migrations may pass, but the final database state can still be
+            wrong.
+          </p>
+          <p>
+            DbState helps teams catch those gaps before they become release, audit, or production problems.
+          </p>
+        </article>
+
+        <article class="card">
+          <h2>Built for database state validation</h2>
+          <ul class="checklist">
+            <li>Compare expected and actual database state</li>
+            <li>Detect drift across environments</li>
+            <li>Validate clean rebuilds</li>
+            <li>Generate release or audit evidence</li>
+            <li>Keep database structure aligned with Git</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>For teams where database correctness matters</h2>
+          <p>
+            DbState is designed for engineering teams working on PostgreSQL-backed applications, fintech platforms,
+            POS and invoicing systems, regulated software, internal platforms, and multi-environment SaaS products.
+          </p>
+        </article>
+
+        <article class="card beta-card" id="request-access">
+          <h2>Now in private beta</h2>
+          <p>
+            DbState is currently in private beta. The first beta is focused on Windows-based PostgreSQL workflows and
+            early validation of database state checks.
+          </p>
+          <p>
+            Access is intentionally limited while we validate the installer experience, local service startup,
+            PostgreSQL workflow, drift detection, rebuild validation, and evidence output.
+          </p>
+          <div class="cta-row">
+            <a id="request-access-link" class="button button-primary" href="https://docs.google.com/forms/d/e/1FAIpQLSdXH4OsaO4l_4yLDZAeHYojzuHsb52hdu1oZ0Bh58un4kqqPQ/viewform">Request Private Beta Access</a>
+          </div>
+          <p class="config-note" id="beta-form-note" hidden>
+            Private beta form URL has not been configured yet.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="page-shell footer">
+      <div>
+        <strong>DbState</strong>
+        <p>Database state you can trust.</p>
+      </div>
+    </footer>
+
+    <script>
+      const config = window.DBSTATE_CONFIG || {};
+      const formUrl = typeof config.privateBetaFormUrl === "string" ? config.privateBetaFormUrl.trim() : "";
+      const demoVideoUrl = typeof config.demoVideoEmbedUrl === "string" ? config.demoVideoEmbedUrl.trim() : "";
+      const primaryCta = document.getElementById("primary-cta");
+      const requestAccessLink = document.getElementById("request-access-link");
+      const note = document.getElementById("beta-form-note");
+      const demoVideo = document.getElementById("demo-video");
+
+      if (formUrl) {
+        primaryCta.href = formUrl;
+        requestAccessLink.href = formUrl;
+        note.hidden = true;
+      } else {
+        primaryCta.href = "#request-access";
+        requestAccessLink.href = "#request-access";
+        note.hidden = false;
+      }
+
+      if (demoVideoUrl) {
+        demoVideo.src = demoVideoUrl;
+      }
+    </script>
+  </body>
+</html>
