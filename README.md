@@ -9,12 +9,13 @@ DbState is not a direct database deployment tool.
 ## Technology Stack
 
 - Astro with static site output
+- Astro Cloudflare adapter for Worker deployment
 - TypeScript in strict mode
 - Tailwind CSS through the official `@tailwindcss/vite` integration
 - npm
 - Prettier with Astro formatting support
 
-No client framework, component library, analytics, backend, or authentication is included in this foundation.
+No client framework, component library, analytics, backend service, or authentication is included in this foundation.
 
 ## Prerequisites
 
@@ -103,24 +104,29 @@ Do not add unsupported database engines, deployment automation claims, fake cust
 
 ## Metadata and Deployment Notes
 
-Cloudflare Workers is the selected deployment target for the static DbState website.
+Cloudflare Workers is the selected deployment target for the DbState website.
 
-Astro generates static output under `dist/`:
+Astro retains static output. `npm run build` generates the production build under `dist/`, including static assets used by the Cloudflare Worker:
 
 ```sh
 npm run build
 ```
 
-`wrangler.jsonc` identifies `dist/` as the Worker static assets directory. There is no Worker script entry point for this site.
+The Astro Cloudflare adapter is used for Worker deployment. `wrangler.jsonc` configures the Astro Cloudflare Worker entry point and binds `dist/` as the static asset directory.
 
-Cloudflare Workers build commands:
+Local Cloudflare-compatible preview:
 
 ```sh
-npx wrangler versions upload
-npx wrangler deploy
+npm run preview
 ```
 
-Non-production Cloudflare builds use `wrangler versions upload`. Production Cloudflare builds use `wrangler deploy`.
+Deployment commands:
+
+```sh
+npm run deploy
+```
+
+Cloudflare branch builds may use `wrangler versions upload`. Production deployment uses `wrangler deploy`.
 
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
