@@ -97,13 +97,6 @@ export const postgresqlCapabilityGroups = [
 export const postgresqlScopeLimitations =
   "Current Private Beta scope does not yet include procedures, aggregates, window functions, default privileges, database-level or column-level privileges, ownership changes, or role membership grants.";
 
-export const screenshotPlaceholders = [
-  "Schema comparison",
-  "Object Diff",
-  "Reference Data Diff",
-  "Release Plan",
-];
-
 export const safetyCommitments = [
   {
     title: "Database execution stays outside DbState",
