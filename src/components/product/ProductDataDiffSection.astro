@@ -1,0 +1,75 @@
+---
+import {
+  dataDiffSafetyBoundaries,
+  dataDiffStates,
+} from "../../data/productPage";
+import { productScreenshots } from "../../data/productScreenshots";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import ProductScreenshotFigure from "./ProductScreenshotFigure.astro";
+
+const dataDiffScreenshot = productScreenshots.find(
+  (screenshot) => screenshot.id === "reference-data-diff",
+);
+---
+
+<SectionContainer ariaLabelledby="data-diff-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="data-diff-heading"
+        eyebrow="Data Diff"
+        title="Review row state without pretending every difference is safe to automate."
+        description="Repository-to-Database reference-data comparison is read-only in the current Private Beta. DbState shows row state so reviewers can decide how to handle differences outside DbState."
+      />
+
+      <div class="mt-6 grid gap-4">
+        <article class="rounded-lg border border-border bg-surface p-4">
+          <h3 class="font-semibold text-text">Current row classifications</h3>
+          <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+            {
+              dataDiffStates.map((state) => (
+                <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 font-mono text-xs text-text-muted">
+                  {state}
+                </li>
+              ))
+            }
+          </ul>
+        </article>
+
+        <article class="rounded-lg border border-border-strong bg-surface p-4">
+          <h3 class="font-semibold text-text">
+            Reference-data safety boundary
+          </h3>
+          <ul class="mt-4 grid gap-2">
+            {
+              dataDiffSafetyBoundaries.map((boundary) => (
+                <li class="rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text-muted">
+                  {boundary}
+                </li>
+              ))
+            }
+          </ul>
+          <p class="mt-4 text-sm leading-6 text-text-soft">
+            Database-only rows may still be referenced by foreign keys or carry
+            historical meaning, so DbState leaves removal decisions for manual
+            review.
+          </p>
+        </article>
+      </div>
+    </div>
+
+    {
+      dataDiffScreenshot && (
+        <ProductScreenshotFigure
+          id="product-data-diff"
+          title={dataDiffScreenshot.title}
+          description={dataDiffScreenshot.description}
+          alt={dataDiffScreenshot.alt}
+          image={dataDiffScreenshot.image}
+          sizes="(min-width: 1180px) 640px, calc(100vw - 2rem)"
+        />
+      )
+    }
+  </div>
+</SectionContainer>

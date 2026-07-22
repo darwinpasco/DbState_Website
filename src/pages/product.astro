@@ -1,15 +1,32 @@
 ---
-import PlaceholderPage from "../components/ui/PlaceholderPage.astro";
+import ProductBoundariesSection from "../components/product/ProductBoundariesSection.astro";
+import ProductDataDiffSection from "../components/product/ProductDataDiffSection.astro";
+import ProductHeroSection from "../components/product/ProductHeroSection.astro";
+import ProductObjectDiffSection from "../components/product/ProductObjectDiffSection.astro";
+import ProductOperatingModelSection from "../components/product/ProductOperatingModelSection.astro";
+import ProductPostgreSqlCoverageSection from "../components/product/ProductPostgreSqlCoverageSection.astro";
+import ProductPrivateBetaSection from "../components/product/ProductPrivateBetaSection.astro";
+import ProductReferenceDataSection from "../components/product/ProductReferenceDataSection.astro";
+import ProductReleasePlanSection from "../components/product/ProductReleasePlanSection.astro";
+import ProductSchemaSection from "../components/product/ProductSchemaSection.astro";
+import ProductWorkflowModelSection from "../components/product/ProductWorkflowModelSection.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Product | DbState"
-  description="A placeholder for the DbState product page, covering the Git-native database state model and review workflow."
+  title="DbState Product | Git-native PostgreSQL state management"
+  description="Explore how DbState compares PostgreSQL databases with repository desired state, versions database objects and reference data, and prepares review-only release artifacts."
+  canonicalPath="/product/"
 >
-  <PlaceholderPage
-    eyebrow="Product"
-    title="DbState product model"
-    description="This page will explain how DbState compares PostgreSQL databases with repository-defined desired state, captures database objects and selected reference data, and prepares review-only release artifacts."
-  />
+  <ProductHeroSection />
+  <ProductOperatingModelSection />
+  <ProductWorkflowModelSection />
+  <ProductSchemaSection />
+  <ProductObjectDiffSection />
+  <ProductReferenceDataSection />
+  <ProductDataDiffSection />
+  <ProductReleasePlanSection />
+  <ProductPostgreSqlCoverageSection />
+  <ProductBoundariesSection />
+  <ProductPrivateBetaSection />
 </BaseLayout>

@@ -1,0 +1,68 @@
+---
+import {
+  referenceDataConfigurationExample,
+  referenceDataExamples,
+  referenceDataRules,
+} from "../../data/productPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="reference-data-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="reference-data-heading"
+        eyebrow="Reference data"
+        title="Reference data belongs in Git too."
+        description="Slowly changing operational rows often carry application meaning but are poorly represented in schema-only workflows. DbState treats selected tables as repository-managed reference data when users explicitly configure them."
+      />
+      <div class="mt-6 rounded-lg border border-border bg-surface p-4">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+        >
+          Common candidates
+        </p>
+        <ul class="mt-4 flex flex-wrap gap-2">
+          {
+            referenceDataExamples.map((example) => (
+              <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 font-mono text-xs text-text-muted">
+                {example}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid gap-4">
+      <article class="rounded-lg border border-border bg-surface p-4">
+        <h3 class="font-semibold text-text">Explicit comparison rules</h3>
+        <ul class="mt-4 grid gap-2">
+          {
+            referenceDataRules.map((rule) => (
+              <li class="rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text-muted">
+                {rule}
+              </li>
+            ))
+          }
+        </ul>
+      </article>
+
+      <article class="rounded-lg border border-border bg-surface p-4">
+        <h3 class="font-semibold text-text">Concise configuration example</h3>
+        <pre
+          class="mt-4 overflow-x-auto rounded-md border border-border bg-bg-muted p-4 text-sm leading-6 text-text"><code>{referenceDataConfigurationExample}</code></pre>
+        <p class="mt-4 text-sm leading-6 text-text-soft">
+          This example identifies <code class="font-mono text-text">
+            public.country
+          </code>{" "}
+          by <code class="font-mono text-text">country_id</code> and excludes{
+            " "
+          }
+          <code class="font-mono text-text">last_update</code> from comparison.
+        </p>
+      </article>
+    </div>
+  </div>
+</SectionContainer>

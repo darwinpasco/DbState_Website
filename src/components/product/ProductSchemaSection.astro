@@ -1,0 +1,62 @@
+---
+import {
+  repositoryObjectTree,
+  schemaFileBenefits,
+} from "../../data/productPage";
+import { productScreenshots } from "../../data/productScreenshots";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import ProductScreenshotFigure from "./ProductScreenshotFigure.astro";
+
+const schemaCompareScreenshot = productScreenshots.find(
+  (screenshot) => screenshot.id === "schema-compare",
+);
+---
+
+<SectionContainer ariaLabelledby="schema-objects-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="schema-objects-heading"
+        eyebrow="Schema state"
+        title="Database objects become durable repository files."
+        description="DbState stores one durable database object per repository file under controlled folders. The repository becomes the place where database structure can be reviewed beside application code."
+      />
+      <div class="mt-6 rounded-lg border border-border bg-surface p-4">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+        >
+          Representative repository structure
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-md border border-border bg-bg-muted p-4 text-sm leading-6 text-text"><code>{repositoryObjectTree}</code></pre>
+      </div>
+      <ul class="mt-5 grid gap-2 sm:grid-cols-2">
+        {
+          schemaFileBenefits.map((benefit) => (
+            <li class="rounded-md border border-border bg-surface px-3 py-2 text-sm text-text-muted">
+              {benefit}
+            </li>
+          ))
+        }
+      </ul>
+      <p class="mt-5 text-sm leading-6 text-text-soft">
+        DbState does not automatically commit these files. Git history remains
+        under user control.
+      </p>
+    </div>
+
+    {
+      schemaCompareScreenshot && (
+        <ProductScreenshotFigure
+          id="product-schema-compare"
+          title={schemaCompareScreenshot.title}
+          description={schemaCompareScreenshot.description}
+          alt={schemaCompareScreenshot.alt}
+          image={schemaCompareScreenshot.image}
+          sizes="(min-width: 1180px) 640px, calc(100vw - 2rem)"
+        />
+      )
+    }
+  </div>
+</SectionContainer>
