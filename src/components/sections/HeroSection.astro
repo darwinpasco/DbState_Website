@@ -1,0 +1,76 @@
+---
+import { primaryCta } from "../../data/navigation";
+import CtaLink from "../ui/CtaLink.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<section class="technical-grid border-b border-border">
+  <div
+    class="mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-[var(--db-content-width)] items-center gap-10 px-[var(--db-space-page)] py-16 md:grid-cols-[1.1fr_0.9fr] md:py-20"
+  >
+    <div>
+      <p
+        class="font-mono text-sm font-semibold uppercase tracking-normal text-accent"
+      >
+        Git-native database state management
+      </p>
+      <h1
+        class="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-text md:text-6xl"
+      >
+        Database state, versioned in Git.
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg leading-8 text-text-muted">
+        Compare PostgreSQL databases with the state defined in your Git
+        repository. Review differences, version database objects and reference
+        data, and generate release SQL without automatically applying it.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <CtaLink href={primaryCta.href} label={primaryCta.label} />
+        <CtaLink
+          href="#product-model"
+          label="See How DbState Works"
+          variant="secondary"
+        />
+      </div>
+      <p class="mt-6 font-mono text-sm text-text-soft">
+        No direct database apply. No hidden migrations. No automatic Git
+        commits.
+      </p>
+    </div>
+
+    <div
+      class="rounded-lg border border-border bg-surface p-4"
+      aria-label="DbState technical status summary"
+    >
+      <div class="flex flex-wrap gap-2">
+        <StatusBadge label="PostgreSQL" />
+        <StatusBadge label="Review-only artifacts" tone="review" />
+        <StatusBadge label="No direct apply" tone="safe" />
+      </div>
+      <div class="mt-6 space-y-3 font-mono text-sm">
+        <div
+          class="flex items-center justify-between gap-4 border-b border-border pb-3"
+        >
+          <span class="text-text-muted">source</span>
+          <span class="text-text">Git repository</span>
+        </div>
+        <div
+          class="flex items-center justify-between gap-4 border-b border-border pb-3"
+        >
+          <span class="text-text-muted">target</span>
+          <span class="text-text">PostgreSQL database</span>
+        </div>
+        <div
+          class="flex items-center justify-between gap-4 border-b border-border pb-3"
+        >
+          <span class="text-text-muted">review</span>
+          <span class="text-review">object and row diffs</span>
+        </div>
+        <div class="flex items-center justify-between gap-4">
+          <span class="text-text-muted">release</span>
+          <span class="text-safe">manual execution path</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

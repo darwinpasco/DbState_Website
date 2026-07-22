@@ -1,0 +1,29 @@
+---
+type Variant = "primary" | "secondary" | "quiet";
+
+type Props = {
+  href: string;
+  label: string;
+  variant?: Variant;
+};
+
+const { href, label, variant = "primary" } = Astro.props;
+
+const variants: Record<Variant, string> = {
+  primary:
+    "border-accent bg-accent text-bg hover:border-accent hover:bg-accent-strong",
+  secondary:
+    "border-border-strong bg-surface text-text hover:border-accent hover:text-accent",
+  quiet: "border-transparent text-text-muted hover:text-text",
+};
+---
+
+<a
+  class:list={[
+    "inline-flex min-h-11 items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold transition-colors",
+    variants[variant],
+  ]}
+  href={href}
+>
+  {label}
+</a>

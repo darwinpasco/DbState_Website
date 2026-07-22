@@ -1,0 +1,31 @@
+---
+import { primaryCta } from "../../data/navigation";
+import SectionContainer from "../layout/SectionContainer.astro";
+import CtaLink from "../ui/CtaLink.astro";
+---
+
+<SectionContainer ariaLabelledby="private-beta-heading" class="pb-20">
+  <div
+    class="rounded-lg border border-border-strong bg-surface-strong p-6 md:p-8"
+  >
+    <p
+      class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+    >
+      Private Beta
+    </p>
+    <h2
+      id="private-beta-heading"
+      class="mt-3 text-2xl font-semibold text-text md:text-3xl"
+    >
+      Request access when your team is ready to review database state in Git.
+    </h2>
+    <p class="mt-4 max-w-2xl text-base leading-7 text-text-muted">
+      The public website foundation links to the Private Beta route, but form
+      submission is intentionally deferred until the product and intake process
+      are defined.
+    </p>
+    <div class="mt-6">
+      <CtaLink href={primaryCta.href} label={primaryCta.label} />
+    </div>
+  </div>
+</SectionContainer>

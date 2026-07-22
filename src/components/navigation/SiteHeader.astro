@@ -1,0 +1,67 @@
+---
+import { navigationItems, primaryCta } from "../../data/navigation";
+import CtaLink from "../ui/CtaLink.astro";
+---
+
+<header
+  class="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur-sm"
+>
+  <div
+    class="mx-auto flex min-h-16 w-full max-w-[var(--db-content-width)] items-center justify-between gap-4 px-[var(--db-space-page)]"
+  >
+    <a
+      class="font-mono text-lg font-bold tracking-normal text-text"
+      href="/"
+      aria-label="DbState home"
+    >
+      DbState
+    </a>
+
+    <nav
+      class="hidden items-center gap-1 md:flex"
+      aria-label="Primary navigation"
+    >
+      {
+        navigationItems.map((item) => (
+          <a
+            class="rounded-sm px-3 py-2 text-sm font-medium text-text-muted transition-colors hover:text-text"
+            href={item.href}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="hidden md:block">
+      <CtaLink href={primaryCta.href} label={primaryCta.label} />
+    </div>
+
+    <details class="group relative md:hidden">
+      <summary
+        class="flex min-h-11 cursor-pointer list-none items-center rounded-md border border-border bg-surface px-3 font-mono text-sm font-semibold text-text marker:hidden"
+        aria-label="Open primary navigation"
+      >
+        Menu
+      </summary>
+      <nav
+        class="absolute right-0 mt-2 w-64 rounded-md border border-border bg-surface p-2 shadow-none"
+        aria-label="Mobile primary navigation"
+      >
+        {
+          navigationItems.map((item) => (
+            <a
+              class="block rounded-sm px-3 py-3 text-sm font-medium text-text-muted hover:bg-surface-strong hover:text-text"
+              href={item.href}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+        <div class="mt-2 border-t border-border pt-2">
+          <CtaLink href={primaryCta.href} label={primaryCta.label} />
+        </div>
+      </nav>
+    </details>
+  </div>
+</header>

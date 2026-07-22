@@ -1,0 +1,13 @@
+---
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="database-change-problem-heading">
+  <SectionHeading
+    id="database-change-problem-heading"
+    eyebrow="Database change problem"
+    title="Database state changes are still difficult to review."
+    description="PostgreSQL schema, database objects, and selected reference data often drift outside the same Git review flow used for application code. DbState starts from the premise that database state should be inspectable as durable repository files before release decisions are made."
+  />
+</SectionContainer>
