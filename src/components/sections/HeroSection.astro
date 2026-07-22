@@ -6,16 +6,16 @@ import StatusBadge from "../ui/StatusBadge.astro";
 
 <section class="technical-grid border-b border-border">
   <div
-    class="mx-auto grid min-h-[calc(100svh-4rem)] w-full max-w-[var(--db-content-width)] items-center gap-10 px-[var(--db-space-page)] py-16 md:grid-cols-[1.1fr_0.9fr] md:py-20"
+    class="mx-auto grid w-full max-w-[var(--db-content-width)] items-center gap-10 px-[var(--db-space-page)] py-14 sm:py-16 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[1fr_0.95fr] lg:py-20"
   >
-    <div>
+    <div class="max-w-3xl">
       <p
         class="font-mono text-sm font-semibold uppercase tracking-normal text-accent"
       >
         Git-native database state management
       </p>
       <h1
-        class="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-text md:text-6xl"
+        class="mt-5 text-4xl font-semibold leading-tight text-text md:text-6xl"
       >
         Database state, versioned in Git.
       </h1>
@@ -39,36 +39,116 @@ import StatusBadge from "../ui/StatusBadge.astro";
     </div>
 
     <div
-      class="rounded-lg border border-border bg-surface p-4"
-      aria-label="DbState technical status summary"
+      class="rounded-lg border border-border bg-surface p-4 md:p-5"
+      role="img"
+      aria-label="Conceptual workflow showing repository desired state and target PostgreSQL database compared by DbState to produce review results and review-only release artifacts."
     >
-      <div class="flex flex-wrap gap-2">
-        <StatusBadge label="PostgreSQL" />
-        <StatusBadge label="Review-only artifacts" tone="review" />
-        <StatusBadge label="No direct apply" tone="safe" />
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+        >
+          Conceptual workflow
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <StatusBadge label="local Git" />
+          <StatusBadge label="PostgreSQL" />
+          <StatusBadge label="review only" tone="review" />
+        </div>
       </div>
-      <div class="mt-6 space-y-3 font-mono text-sm">
-        <div
-          class="flex items-center justify-between gap-4 border-b border-border pb-3"
-        >
-          <span class="text-text-muted">source</span>
-          <span class="text-text">Git repository</span>
+
+      <div class="mt-5 grid gap-3 sm:grid-cols-2">
+        <div class="rounded-md border border-border bg-bg-muted p-4">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="font-mono text-sm font-semibold text-text">
+              Repository desired state
+            </h2>
+            <span class="font-mono text-xs text-safe">files</span>
+          </div>
+          <ul class="mt-4 space-y-2 font-mono text-xs text-text-muted">
+            <li class="rounded-sm border border-border bg-surface px-2 py-1.5">
+              schema/tables/customer.sql
+            </li>
+            <li class="rounded-sm border border-border bg-surface px-2 py-1.5">
+              objects/views/revenue.sql
+            </li>
+            <li class="rounded-sm border border-border bg-surface px-2 py-1.5">
+              data/reference/status.yml
+            </li>
+          </ul>
         </div>
-        <div
-          class="flex items-center justify-between gap-4 border-b border-border pb-3"
-        >
-          <span class="text-text-muted">target</span>
-          <span class="text-text">PostgreSQL database</span>
+
+        <div class="rounded-md border border-border bg-bg-muted p-4">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="font-mono text-sm font-semibold text-text">
+              Target PostgreSQL database
+            </h2>
+            <span class="font-mono text-xs text-accent">read</span>
+          </div>
+          <ul class="mt-4 space-y-2 font-mono text-xs text-text-muted">
+            <li class="rounded-sm border border-border bg-surface px-2 py-1.5">
+              public.customer
+            </li>
+            <li class="rounded-sm border border-border bg-surface px-2 py-1.5">
+              reporting.revenue
+            </li>
+            <li class="rounded-sm border border-border bg-surface px-2 py-1.5">
+              ref.status
+            </li>
+          </ul>
         </div>
+
         <div
-          class="flex items-center justify-between gap-4 border-b border-border pb-3"
+          class="rounded-md border border-accent bg-accent-soft p-4 sm:col-span-2"
         >
-          <span class="text-text-muted">review</span>
-          <span class="text-review">object and row diffs</span>
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <h2 class="font-mono text-sm font-semibold text-text">
+                DbState comparison
+              </h2>
+              <p class="mt-1 text-sm leading-6 text-text-muted">
+                Object and row-level differences are prepared for review.
+              </p>
+            </div>
+            <StatusBadge label="no database mutation" tone="safe" />
+          </div>
+          <div class="mt-4 grid gap-2 sm:grid-cols-4">
+            <div class="rounded-sm border border-border bg-surface p-3">
+              <p class="font-mono text-xs text-text-soft">status</p>
+              <p class="mt-1 font-mono text-sm text-safe">In sync</p>
+            </div>
+            <div class="rounded-sm border border-border bg-surface p-3">
+              <p class="font-mono text-xs text-text-soft">status</p>
+              <p class="mt-1 font-mono text-sm text-review">Different</p>
+            </div>
+            <div class="rounded-sm border border-border bg-surface p-3">
+              <p class="font-mono text-xs text-text-soft">status</p>
+              <p class="mt-1 font-mono text-sm text-review">Missing</p>
+            </div>
+            <div class="rounded-sm border border-border bg-surface p-3">
+              <p class="font-mono text-xs text-text-soft">status</p>
+              <p class="mt-1 font-mono text-sm text-danger">Database only</p>
+            </div>
+          </div>
         </div>
-        <div class="flex items-center justify-between gap-4">
-          <span class="text-text-muted">release</span>
-          <span class="text-safe">manual execution path</span>
+
+        <div
+          class="rounded-md border border-review/70 bg-review-soft p-4 sm:col-span-2"
+        >
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <h2 class="font-mono text-sm font-semibold text-review">
+                Review-only SQL artifact
+              </h2>
+              <p class="mt-1 text-sm leading-6 text-text-muted">
+                Generated for human inspection. DbState does not execute it.
+              </p>
+            </div>
+            <StatusBadge label="manual review" tone="review" />
+          </div>
         </div>
       </div>
     </div>
