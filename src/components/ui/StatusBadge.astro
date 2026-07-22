@@ -1,0 +1,26 @@
+---
+type Tone = "safe" | "review" | "neutral" | "danger";
+
+type Props = {
+  label: string;
+  tone?: Tone;
+};
+
+const { label, tone = "neutral" } = Astro.props;
+
+const tones: Record<Tone, string> = {
+  safe: "border-safe/60 bg-safe-soft text-safe",
+  review: "border-review/60 bg-review-soft text-review",
+  neutral: "border-border bg-surface text-text-muted",
+  danger: "border-danger/60 bg-danger/10 text-danger",
+};
+---
+
+<span
+  class:list={[
+    "inline-flex w-fit items-center rounded-sm border px-2.5 py-1 font-mono text-xs font-semibold uppercase tracking-normal",
+    tones[tone],
+  ]}
+>
+  {label}
+</span>

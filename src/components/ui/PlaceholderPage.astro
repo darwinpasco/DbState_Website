@@ -1,0 +1,35 @@
+---
+import CtaLink from "./CtaLink.astro";
+
+type Props = {
+  eyebrow: string;
+  title: string;
+  description: string;
+};
+
+const { eyebrow, title, description } = Astro.props;
+---
+
+<section
+  class="mx-auto min-h-[60svh] w-full max-w-[var(--db-content-width)] px-[var(--db-space-page)] py-16 md:py-24"
+>
+  <p
+    class="font-mono text-sm font-semibold uppercase tracking-normal text-accent"
+  >
+    {eyebrow}
+  </p>
+  <h1
+    class="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-text md:text-5xl"
+  >
+    {title}
+  </h1>
+  <p class="mt-6 max-w-2xl text-lg leading-8 text-text-muted">
+    {description}
+  </p>
+  <p class="mt-5 max-w-2xl font-mono text-sm text-review">
+    Detailed content will be added in a later website task.
+  </p>
+  <div class="mt-8">
+    <CtaLink href="/" label="Return to Homepage" variant="secondary" />
+  </div>
+</section>

@@ -1,0 +1,52 @@
+---
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer id="product-model" ariaLabelledby="product-model-heading">
+  <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <SectionHeading
+      id="product-model-heading"
+      eyebrow="Product model"
+      title="DbState sits between PostgreSQL and repository-defined desired state."
+      description="The repository is the durable review surface. DbState compares what exists in a PostgreSQL database with what the repository says should exist, then prepares artifacts for review instead of applying changes itself."
+    />
+
+    <div
+      class="rounded-lg border border-border bg-surface p-4"
+      role="img"
+      aria-label="PostgreSQL Database connects bidirectionally with DbState. DbState connects bidirectionally with Git Repository Desired State. Git Repository Desired State produces Review-only Release Artifacts."
+    >
+      <div class="grid gap-3 font-mono text-sm">
+        <div
+          class="rounded-md border border-border-strong bg-surface-strong p-4 text-center text-text"
+        >
+          PostgreSQL Database
+        </div>
+        <div class="text-center text-2xl text-accent" aria-hidden="true">↕</div>
+        <div
+          class="rounded-md border border-accent bg-accent-soft p-4 text-center text-text"
+        >
+          DbState
+        </div>
+        <div class="text-center text-2xl text-accent" aria-hidden="true">↕</div>
+        <div
+          class="rounded-md border border-border-strong bg-surface-strong p-4 text-center text-text"
+        >
+          Git Repository Desired State
+        </div>
+        <div class="text-center text-2xl text-review" aria-hidden="true">↓</div>
+        <div
+          class="rounded-md border border-review/70 bg-review-soft p-4 text-center text-review"
+        >
+          Review-only Release Artifacts
+        </div>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <StatusBadge label="review first" tone="review" />
+        <StatusBadge label="manual apply outside DbState" tone="safe" />
+      </div>
+    </div>
+  </div>
+</SectionContainer>

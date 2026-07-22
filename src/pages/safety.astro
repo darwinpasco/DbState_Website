@@ -1,0 +1,15 @@
+---
+import PlaceholderPage from "../components/ui/PlaceholderPage.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Safety | DbState"
+  description="A placeholder for DbState safety boundaries, including review-only artifacts and no direct database apply."
+>
+  <PlaceholderPage
+    eyebrow="Safety"
+    title="Review-first safety boundaries"
+    description="This page will document DbState safety commitments, including no direct database apply, no generated SQL execution, no automatic Git commits, and no PostgreSQL password storage."
+  />
+</BaseLayout>

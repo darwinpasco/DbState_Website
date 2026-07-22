@@ -1,0 +1,23 @@
+---
+import { intendedUsers } from "../../data/homepage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="intended-users-heading">
+  <SectionHeading
+    id="intended-users-heading"
+    eyebrow="Intended users"
+    title="Built for teams that review database state with the same discipline as code."
+    description="The initial site foundation keeps the audience concrete and avoids unsupported claims about deployment automation."
+  />
+  <ul class="mt-8 grid gap-3 md:grid-cols-2">
+    {
+      intendedUsers.map((user) => (
+        <li class="rounded-md border border-border bg-surface p-4 text-sm leading-6 text-text-muted">
+          {user}
+        </li>
+      ))
+    }
+  </ul>
+</SectionContainer>

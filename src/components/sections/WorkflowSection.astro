@@ -1,0 +1,27 @@
+---
+import { workflowSteps } from "../../data/homepage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="workflow-heading">
+  <SectionHeading
+    id="workflow-heading"
+    eyebrow="Workflow overview"
+    title="A review flow for state, diffs, and release artifacts."
+    description="The initial website foundation names the core workflow without turning it into a deployment promise."
+  />
+  <ol class="mt-8 grid gap-3 md:grid-cols-4">
+    {
+      workflowSteps.map((step, index) => (
+        <li class="rounded-md border border-border bg-surface p-4">
+          <p class="font-mono text-xs text-text-soft">0{index + 1}</p>
+          <h3 class="mt-3 text-lg font-semibold text-text">{step.label}</h3>
+          <p class="mt-2 text-sm leading-6 text-text-muted">
+            {step.description}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</SectionContainer>

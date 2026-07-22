@@ -1,0 +1,33 @@
+---
+import { navigationItems } from "../../data/navigation";
+---
+
+<footer class="border-t border-border bg-bg-muted">
+  <div
+    class="mx-auto grid w-full max-w-[var(--db-content-width)] gap-8 px-[var(--db-space-page)] py-10 md:grid-cols-[1fr_auto]"
+  >
+    <div>
+      <p class="font-mono text-base font-bold text-text">DbState</p>
+      <p class="mt-3 max-w-xl text-sm leading-6 text-text-muted">
+        Database state, versioned in Git. Built for PostgreSQL teams that want
+        durable review context without direct database apply.
+      </p>
+      <p class="mt-4 font-mono text-xs text-text-soft">
+        No direct database apply. No generated SQL execution. No automatic Git
+        commits.
+      </p>
+    </div>
+    <nav
+      class="flex flex-wrap gap-x-5 gap-y-3 md:justify-end"
+      aria-label="Footer navigation"
+    >
+      {
+        navigationItems.map((item) => (
+          <a class="text-sm text-text-muted hover:text-text" href={item.href}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</footer>
