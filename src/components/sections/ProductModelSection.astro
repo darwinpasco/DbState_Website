@@ -5,47 +5,157 @@ import StatusBadge from "../ui/StatusBadge.astro";
 ---
 
 <SectionContainer id="product-model" ariaLabelledby="product-model-heading">
-  <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+  <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
     <SectionHeading
       id="product-model-heading"
       eyebrow="Product model"
-      title="DbState sits between PostgreSQL and repository-defined desired state."
-      description="The repository is the durable review surface. DbState compares what exists in a PostgreSQL database with what the repository says should exist, then prepares artifacts for review instead of applying changes itself."
+      title="DbState turns database state into reviewable repository files."
+      description="DbState inspects PostgreSQL, writes durable database object files to your repository, compares repository state with database state, and generates review-only release artifacts for human review."
     />
 
-    <div
-      class="rounded-lg border border-border bg-surface p-4"
-      role="img"
-      aria-label="PostgreSQL Database connects bidirectionally with DbState. DbState connects bidirectionally with Git Repository Desired State. Git Repository Desired State produces Review-only Release Artifacts."
-    >
-      <div class="grid gap-3 font-mono text-sm">
-        <div
-          class="rounded-md border border-border-strong bg-surface-strong p-4 text-center text-text"
-        >
-          PostgreSQL Database
+    <div class="grid gap-4">
+      <div
+        class="rounded-lg border border-border bg-surface p-4 md:p-5"
+        role="img"
+        aria-label="Product model. PostgreSQL Database exchanges read state with DbState. DbState writes repository files and reads repository desired state. Git Repository Desired State produces Review-only Release Artifacts. DbState does not mutate the database."
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p
+            class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+          >
+            How DbState organizes database state
+          </p>
+          <StatusBadge label="no database writes" tone="safe" />
         </div>
-        <div class="text-center text-2xl text-accent" aria-hidden="true">↕</div>
-        <div
-          class="rounded-md border border-accent bg-accent-soft p-4 text-center text-text"
-        >
-          DbState
-        </div>
-        <div class="text-center text-2xl text-accent" aria-hidden="true">↕</div>
-        <div
-          class="rounded-md border border-border-strong bg-surface-strong p-4 text-center text-text"
-        >
-          Git Repository Desired State
-        </div>
-        <div class="text-center text-2xl text-review" aria-hidden="true">↓</div>
-        <div
-          class="rounded-md border border-review/70 bg-review-soft p-4 text-center text-review"
-        >
-          Review-only Release Artifacts
+
+        <div class="mt-5 grid gap-3 font-mono text-sm">
+          <div
+            class="rounded-md border border-border-strong bg-surface-strong p-4 text-center text-text"
+          >
+            <p>PostgreSQL Database</p>
+            <p class="mt-2 text-xs text-text-soft">
+              read schema, objects, data
+            </p>
+          </div>
+          <div
+            class="text-center font-mono text-xs uppercase tracking-normal text-accent"
+            aria-hidden="true"
+          >
+            read comparison input
+          </div>
+          <div
+            class="rounded-md border border-accent bg-accent-soft p-4 text-center text-text"
+          >
+            <p class="text-base font-semibold">DbState</p>
+            <p class="mt-2 text-xs text-text-muted">
+              compare, capture, prepare review artifacts
+            </p>
+          </div>
+          <div
+            class="text-center font-mono text-xs uppercase tracking-normal text-accent"
+            aria-hidden="true"
+          >
+            repository file writes and read-only comparison
+          </div>
+          <div
+            class="rounded-md border border-border-strong bg-surface-strong p-4 text-center text-text"
+          >
+            <p>Git Repository Desired State</p>
+            <p class="mt-2 text-xs text-text-soft">
+              object files and selected YAML reference data
+            </p>
+          </div>
+          <div
+            class="text-center font-mono text-xs uppercase tracking-normal text-review"
+            aria-hidden="true"
+          >
+            generate for review
+          </div>
+          <div
+            class="rounded-md border border-review/70 bg-review-soft p-4 text-center text-review"
+          >
+            <p>Review-only Release Artifacts</p>
+            <p class="mt-2 text-xs text-text-muted">
+              prepared for human inspection, not executed by DbState
+            </p>
+          </div>
         </div>
       </div>
-      <div class="mt-4 flex flex-wrap gap-2">
-        <StatusBadge label="review first" tone="review" />
-        <StatusBadge label="manual apply outside DbState" tone="safe" />
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="rounded-lg border border-border bg-surface p-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="font-mono text-sm font-semibold text-text">
+              Database to Repository
+            </h3>
+            <StatusBadge label="repository file writes" tone="safe" />
+          </div>
+          <p class="mt-4 text-sm leading-6 text-text-muted">
+            Capture selected database state into repository-managed files.
+          </p>
+          <dl class="mt-4 grid gap-2 font-mono text-xs">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-text-soft">database</dt>
+              <dd class="text-accent">read</dd>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-text-soft">repository</dt>
+              <dd class="text-safe">write files</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="rounded-lg border border-border bg-surface p-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="font-mono text-sm font-semibold text-text">
+              Repository to Database
+            </h3>
+            <StatusBadge label="review only" tone="review" />
+          </div>
+          <p class="mt-4 text-sm leading-6 text-text-muted">
+            Compare desired state with a target database and prepare review-only
+            release artifacts.
+          </p>
+          <dl class="mt-4 grid gap-2 font-mono text-xs">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-text-soft">comparison</dt>
+              <dd class="text-accent">read only</dd>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-text-soft">database</dt>
+              <dd class="text-safe">not mutated</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <div
+        class="rounded-lg border border-border bg-bg-muted p-4"
+        aria-label="Operation safety legend"
+      >
+        <h3 class="font-mono text-sm font-semibold text-text">
+          Operation boundaries
+        </h3>
+        <div class="mt-4 grid gap-2 sm:grid-cols-2">
+          <div class="rounded-sm border border-border bg-surface px-3 py-2">
+            <p class="font-mono text-xs text-text-soft">Database writes</p>
+            <p class="mt-1 text-sm text-safe">Not performed by DbState</p>
+          </div>
+          <div class="rounded-sm border border-border bg-surface px-3 py-2">
+            <p class="font-mono text-xs text-text-soft">
+              Repository file writes
+            </p>
+            <p class="mt-1 text-sm text-safe">Used during capture</p>
+          </div>
+          <div class="rounded-sm border border-border bg-surface px-3 py-2">
+            <p class="font-mono text-xs text-text-soft">Comparison</p>
+            <p class="mt-1 text-sm text-accent">Read-only inspection</p>
+          </div>
+          <div class="rounded-sm border border-border bg-surface px-3 py-2">
+            <p class="font-mono text-xs text-text-soft">Release artifacts</p>
+            <p class="mt-1 text-sm text-review">Generated for review</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>

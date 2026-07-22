@@ -1,13 +1,87 @@
 ---
 import SectionContainer from "../layout/SectionContainer.astro";
 import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
 ---
 
 <SectionContainer ariaLabelledby="database-change-problem-heading">
-  <SectionHeading
-    id="database-change-problem-heading"
-    eyebrow="Database change problem"
-    title="Database state changes are still difficult to review."
-    description="PostgreSQL schema, database objects, and selected reference data often drift outside the same Git review flow used for application code. DbState starts from the premise that database state should be inspectable as durable repository files before release decisions are made."
-  />
+  <div class="grid gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+    <SectionHeading
+      id="database-change-problem-heading"
+      eyebrow="Database change problem"
+      title="Your database is part of the application, but it rarely gets the same review discipline."
+      description="Application code usually moves through a clear repository review path. Database state is often split across running databases, migration folders, manual scripts, admin tools, one-off production patches, and undocumented operational changes."
+    />
+
+    <div class="grid gap-4">
+      <div class="rounded-lg border border-border bg-surface p-4 md:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-mono text-sm font-semibold text-text">
+            Application code workflow
+          </h3>
+          <StatusBadge label="repository centered" tone="safe" />
+        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-3">
+          <div class="rounded-md border border-border bg-bg-muted p-3">
+            <p class="font-mono text-xs text-text-soft">01</p>
+            <p class="mt-2 text-sm font-semibold text-text">Change files</p>
+          </div>
+          <div class="rounded-md border border-border bg-bg-muted p-3">
+            <p class="font-mono text-xs text-text-soft">02</p>
+            <p class="mt-2 text-sm font-semibold text-text">Review diff</p>
+          </div>
+          <div class="rounded-md border border-border bg-bg-muted p-3">
+            <p class="font-mono text-xs text-text-soft">03</p>
+            <p class="mt-2 text-sm font-semibold text-text">Release artifact</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-border-strong bg-surface p-4 md:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-mono text-sm font-semibold text-text">
+            Database state workflow
+          </h3>
+          <StatusBadge label="often fragmented" tone="review" />
+        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+          {
+            [
+              "Running databases",
+              "Migration folders",
+              "Manual scripts",
+              "Admin tools",
+              "One-off production patches",
+              "Undocumented operational changes",
+            ].map((source) => (
+              <div class="rounded-md border border-border bg-bg-muted p-3">
+                <p class="font-mono text-sm text-text-muted">{source}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-accent/70 bg-accent-soft p-4 md:p-5">
+        <h3 class="font-mono text-sm font-semibold text-text">
+          Questions DbState helps reviewers answer
+        </h3>
+        <div class="mt-4 grid gap-2 sm:grid-cols-2">
+          {
+            [
+              "Does the database match the repository?",
+              "What changed?",
+              "Which objects exist only in the database?",
+              "What should reviewers inspect before release?",
+              "Does reference data still match?",
+            ].map((question) => (
+              <p class="rounded-sm border border-border bg-surface px-3 py-2 text-sm leading-6 text-text-muted">
+                {question}
+              </p>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
 </SectionContainer>
