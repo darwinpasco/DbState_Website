@@ -1,0 +1,59 @@
+---
+import {
+  repositoryWriteBoundaries,
+  repositoryWriteTargets,
+} from "../../data/safetyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="repository-write-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="repository-write-heading"
+        eyebrow="Repository writes"
+        title="Repository writes are explicit."
+        description="Database-to-Repository workflows can write repository-managed state, but only through intentional user workflows. Capture changes do not mutate PostgreSQL."
+      />
+      <p
+        class="mt-6 rounded-lg border border-border-strong bg-bg-muted p-4 font-mono text-sm leading-6 text-text-muted"
+      >
+        DbState requires an explicit workflow before writing repository-managed
+        state.
+      </p>
+    </div>
+
+    <div class="grid gap-4">
+      <article class="rounded-lg border border-border bg-surface p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-semibold text-text">Repository write targets</h3>
+          <StatusBadge label="controlled folders" tone="safe" />
+        </div>
+        <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+          {
+            repositoryWriteTargets.map((target) => (
+              <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm text-text-muted">
+                {target}
+              </li>
+            ))
+          }
+        </ul>
+      </article>
+
+      <article class="rounded-lg border border-border bg-surface p-4">
+        <h3 class="font-semibold text-text">Write boundary</h3>
+        <ul class="mt-4 grid gap-2">
+          {
+            repositoryWriteBoundaries.map((boundary) => (
+              <li class="rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text-muted">
+                {boundary}
+              </li>
+            ))
+          }
+        </ul>
+      </article>
+    </div>
+  </div>
+</SectionContainer>

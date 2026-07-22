@@ -1,15 +1,34 @@
 ---
-import PlaceholderPage from "../components/ui/PlaceholderPage.astro";
+import CredentialHandlingSection from "../components/safety/CredentialHandlingSection.astro";
+import DatabaseExecutionBoundarySection from "../components/safety/DatabaseExecutionBoundarySection.astro";
+import GitControlBoundarySection from "../components/safety/GitControlBoundarySection.astro";
+import ManualReviewSection from "../components/safety/ManualReviewSection.astro";
+import NonGuaranteesSection from "../components/safety/NonGuaranteesSection.astro";
+import PrivateBetaSafetyScopeSection from "../components/safety/PrivateBetaSafetyScopeSection.astro";
+import ReferenceDataSafetySection from "../components/safety/ReferenceDataSafetySection.astro";
+import ReleaseArtifactHandoffSection from "../components/safety/ReleaseArtifactHandoffSection.astro";
+import RepositoryWriteBoundarySection from "../components/safety/RepositoryWriteBoundarySection.astro";
+import SafetyHeroSection from "../components/safety/SafetyHeroSection.astro";
+import SafetyOperatingModelSection from "../components/safety/SafetyOperatingModelSection.astro";
+import SafetyPrivateBetaCtaSection from "../components/safety/SafetyPrivateBetaCtaSection.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Safety | DbState"
-  description="A placeholder for DbState safety boundaries, including review-only artifacts and no direct database apply."
+  title="DbState Safety Model | Review-first database state management"
+  description="Learn how DbState separates database inspection, repository writes, release preparation, Git operations, and database execution through an explicit review-first safety model."
+  canonicalPath="/safety/"
 >
-  <PlaceholderPage
-    eyebrow="Safety"
-    title="Review-first safety boundaries"
-    description="This page will document DbState safety commitments, including no direct database apply, no generated SQL execution, no automatic Git commits, and no PostgreSQL password storage."
-  />
+  <SafetyHeroSection />
+  <SafetyOperatingModelSection />
+  <DatabaseExecutionBoundarySection />
+  <RepositoryWriteBoundarySection />
+  <GitControlBoundarySection />
+  <ManualReviewSection />
+  <ReferenceDataSafetySection />
+  <CredentialHandlingSection />
+  <ReleaseArtifactHandoffSection />
+  <NonGuaranteesSection />
+  <PrivateBetaSafetyScopeSection />
+  <SafetyPrivateBetaCtaSection />
 </BaseLayout>

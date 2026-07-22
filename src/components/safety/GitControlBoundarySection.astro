@@ -1,0 +1,39 @@
+---
+import { gitOperationsOutsideDbState } from "../../data/safetyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="git-control-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.86fr_1.14fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="git-control-heading"
+        eyebrow="Git control"
+        title="Git remains user-controlled."
+        description="DbState may show local Git workflow visibility, but users remain responsible for Git commands and repository history."
+      />
+      <div class="mt-6 rounded-lg border border-border bg-surface p-4">
+        <StatusBadge label="local Git visibility only" />
+        <p class="mt-4 text-sm leading-6 text-text-muted">
+          Current Private Beta does not provide hosted collaboration, shared Git
+          workflows, or server-side repository management.
+        </p>
+      </div>
+    </div>
+
+    <article class="rounded-lg border border-border bg-surface p-4">
+      <h3 class="font-semibold text-text">DbState does not automatically</h3>
+      <ul class="mt-4 grid gap-2 sm:grid-cols-3">
+        {
+          gitOperationsOutsideDbState.map((operation) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 font-mono text-xs text-text-muted">
+              {operation}
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </div>
+</SectionContainer>

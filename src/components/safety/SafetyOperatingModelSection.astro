@@ -1,0 +1,107 @@
+---
+import {
+  capturePath,
+  safetyModelBoundaries,
+  safetyModelMainPath,
+} from "../../data/safetyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="safety-model-heading">
+  <div class="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="safety-model-heading"
+        eyebrow="Operating model"
+        title="Explicit operations. Separate boundaries."
+        description="DbState separates reading database state, writing repository files, comparing desired state, preparing release handoff artifacts, and executing database changes."
+      />
+      <div class="mt-6 grid gap-3">
+        {
+          safetyModelBoundaries.map((boundary) => (
+            <div class="rounded-md border border-border bg-surface px-4 py-3">
+              <p class="text-sm leading-6 text-text-muted">{boundary}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="grid gap-4">
+      <article
+        class="rounded-lg border border-border bg-surface p-4"
+        aria-label="Repository to Database review path"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-mono text-sm font-semibold text-text">
+            Repository to Database review path
+          </h3>
+          <StatusBadge label="read-only until handoff" tone="review" />
+        </div>
+        <ol class="mt-5 grid gap-3">
+          {
+            safetyModelMainPath.map((step, index) => (
+              <li>
+                <div class="rounded-md border border-border bg-bg-muted p-4">
+                  <p class="font-mono text-xs uppercase tracking-normal text-text-soft">
+                    {step.label}
+                  </p>
+                  <h4 class="mt-1 font-semibold text-text">{step.title}</h4>
+                  <p class="mt-2 text-sm leading-6 text-text-muted">
+                    {step.detail}
+                  </p>
+                </div>
+                {index < safetyModelMainPath.length - 1 && (
+                  <div
+                    class="py-2 text-center font-mono text-lg text-accent"
+                    aria-hidden="true"
+                  >
+                    ↓
+                  </div>
+                )}
+              </li>
+            ))
+          }
+        </ol>
+      </article>
+
+      <article
+        class="rounded-lg border border-border bg-surface p-4"
+        aria-label="Database to Repository capture path"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-mono text-sm font-semibold text-text">
+            Database to Repository capture path
+          </h3>
+          <StatusBadge label="explicit repository write" tone="safe" />
+        </div>
+        <ol
+          class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center"
+        >
+          {
+            capturePath.map((step, index) => (
+              <>
+                <li class="rounded-md border border-border bg-bg-muted p-4">
+                  <p class="font-mono text-xs uppercase tracking-normal text-text-soft">
+                    {step.label}
+                  </p>
+                  <h4 class="mt-1 font-semibold text-text">{step.title}</h4>
+                </li>
+                {index < capturePath.length - 1 && (
+                  <li
+                    class="text-center font-mono text-lg text-accent"
+                    aria-hidden="true"
+                  >
+                    ↓
+                  </li>
+                )}
+              </>
+            ))
+          }
+        </ol>
+      </article>
+    </div>
+  </div>
+</SectionContainer>

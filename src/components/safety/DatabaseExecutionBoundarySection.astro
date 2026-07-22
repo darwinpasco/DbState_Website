@@ -1,0 +1,40 @@
+---
+import { databaseExecutionPoints } from "../../data/safetyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="database-execution-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="database-execution-heading"
+        eyebrow="Database execution"
+        title="Database execution stays outside DbState."
+        description="DbState helps teams understand and prepare database changes. It does not take over the point where approved SQL is executed against a database."
+      />
+      <div class="mt-6 rounded-lg border border-border-strong bg-bg-muted p-4">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-review"
+        >
+          DbState boundary ends before database execution.
+        </p>
+        <p class="mt-4 text-sm leading-6 text-text-muted">
+          DbState does not validate every operational risk in SQL that users
+          execute outside the product. Existing database release controls remain
+          necessary.
+        </p>
+      </div>
+    </div>
+
+    <ul class="grid gap-3">
+      {
+        databaseExecutionPoints.map((point) => (
+          <li class="rounded-md border border-border bg-surface p-4 text-sm leading-6 text-text-muted">
+            {point}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</SectionContainer>

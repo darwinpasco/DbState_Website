@@ -1,0 +1,81 @@
+---
+import SectionContainer from "../layout/SectionContainer.astro";
+import CtaLink from "../ui/CtaLink.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer class="pt-16 md:pt-24" ariaLabelledby="safety-hero-heading">
+  <div
+    class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.58fr)] lg:items-center"
+  >
+    <div class="max-w-3xl">
+      <p
+        class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+      >
+        Review-first database state management
+      </p>
+      <h1
+        id="safety-hero-heading"
+        class="mt-4 text-4xl font-semibold tracking-normal text-text md:text-6xl"
+      >
+        Understand the change before anything is executed.
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg leading-8 text-text-muted">
+        DbState inspects, compares, captures, and prepares database state for
+        review. It keeps database execution and Git history under the team's
+        control.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <CtaLink href="/product" label="Explore the Product" />
+        <CtaLink
+          href="/private-beta"
+          label="Request Private Beta Access"
+          variant="secondary"
+        />
+      </div>
+      <p class="mt-5 font-mono text-sm text-text-soft">
+        No direct database apply. No generated SQL execution. No automatic Git
+        commits.
+      </p>
+    </div>
+
+    <aside
+      class="rounded-lg border border-border bg-surface p-5"
+      aria-label="Safety boundary summary"
+    >
+      <StatusBadge label="review-first boundary" tone="review" />
+      <dl class="mt-5 grid gap-3">
+        <div class="rounded-md border border-border bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            DbState can
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-text">
+            Inspect, compare, capture, diff, and prepare
+          </dd>
+        </div>
+        <div class="rounded-md border border-border bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            DbState does not
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-text">
+            Execute database changes or Git history changes
+          </dd>
+        </div>
+        <div class="rounded-md border border-border-strong bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            Handoff
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-review">
+            Review-only artifacts for external execution
+          </dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+</SectionContainer>
