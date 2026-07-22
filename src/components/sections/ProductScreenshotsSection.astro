@@ -1,0 +1,130 @@
+---
+import { Image } from "astro:assets";
+import { productScreenshots } from "../../data/productScreenshots";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+
+const featuredScreenshot = productScreenshots.find(
+  (screenshot) => screenshot.featured,
+);
+const supportingScreenshots = productScreenshots.filter(
+  (screenshot) => !screenshot.featured,
+);
+---
+
+<SectionContainer ariaLabelledby="interface-heading">
+  <SectionHeading
+    id="interface-heading"
+    eyebrow="Product interface"
+    title="See the database state before you change it."
+    description="DbState presents schema objects, reference-data rows, and release candidates as explicit comparison states that teams can inspect before database execution occurs outside DbState."
+  />
+
+  {
+    featuredScreenshot && (
+      <figure
+        class="mt-8 overflow-hidden rounded-lg border border-border bg-surface"
+        aria-labelledby={`${featuredScreenshot.id}-title`}
+        aria-describedby={`${featuredScreenshot.id}-description`}
+      >
+        <a
+          href={featuredScreenshot.image.src}
+          aria-label={`Open full-size ${featuredScreenshot.title} screenshot`}
+          class="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        >
+          <Image
+            src={featuredScreenshot.image}
+            alt={featuredScreenshot.alt}
+            width={1600}
+            height={1000}
+            quality={92}
+            loading="lazy"
+            decoding="async"
+            class="h-auto w-full max-w-full border-b border-border bg-bg-muted"
+            sizes="(min-width: 1180px) 1120px, calc(100vw - 2rem)"
+          />
+        </a>
+        <figcaption class="grid gap-3 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:p-5">
+          <div>
+            <h3
+              id={`${featuredScreenshot.id}-title`}
+              class="text-lg font-semibold text-text"
+            >
+              {featuredScreenshot.title}
+            </h3>
+            <p
+              id={`${featuredScreenshot.id}-description`}
+              class="mt-2 max-w-3xl text-sm leading-6 text-text-muted"
+            >
+              {featuredScreenshot.description}
+            </p>
+          </div>
+          <a
+            href={featuredScreenshot.image.src}
+            class="font-mono text-xs font-semibold uppercase tracking-normal text-accent underline decoration-border underline-offset-4 hover:text-accent-strong"
+          >
+            Open full-size {featuredScreenshot.title} screenshot
+          </a>
+        </figcaption>
+      </figure>
+    )
+  }
+
+  <div class="mt-5 grid gap-4 lg:grid-cols-3">
+    {
+      supportingScreenshots.map((screenshot) => (
+        <figure
+          class="overflow-hidden rounded-md border border-border bg-surface"
+          aria-labelledby={`${screenshot.id}-title`}
+          aria-describedby={`${screenshot.id}-description`}
+        >
+          <a
+            href={screenshot.image.src}
+            aria-label={`Open full-size ${screenshot.title} screenshot`}
+            class="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          >
+            <Image
+              src={screenshot.image}
+              alt={screenshot.alt}
+              width={1600}
+              height={1000}
+              quality={92}
+              loading="lazy"
+              decoding="async"
+              class="h-auto w-full max-w-full border-b border-border bg-bg-muted"
+              sizes="(min-width: 1180px) 352px, (min-width: 1024px) 30vw, calc(100vw - 2rem)"
+            />
+          </a>
+          <figcaption class="p-4">
+            <h3
+              id={`${screenshot.id}-title`}
+              class="text-base font-semibold text-text"
+            >
+              {screenshot.title}
+            </h3>
+            <p
+              id={`${screenshot.id}-description`}
+              class="mt-2 text-sm leading-6 text-text-muted"
+            >
+              {screenshot.description}
+            </p>
+            <a
+              href={screenshot.image.src}
+              class="mt-4 inline-block font-mono text-xs font-semibold uppercase tracking-normal text-accent underline decoration-border underline-offset-4 hover:text-accent-strong"
+            >
+              Open full-size {screenshot.title} screenshot
+            </a>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+
+  <p class="mt-5 max-w-3xl font-mono text-xs leading-6 text-text-soft">
+    Screenshots show real DbState Private Beta workflows captured with a local
+    Pagila PostgreSQL database and a local Git-managed desired-state repository.
+  </p>
+</SectionContainer>
+
+)) }
+
