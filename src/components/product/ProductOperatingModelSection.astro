@@ -1,0 +1,125 @@
+---
+import { operatingModelSteps } from "../../data/productPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="operating-model-heading">
+  <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="operating-model-heading"
+        eyebrow="Operating model"
+        title="One repository. Two directions. Explicit state."
+        description="The Git repository is the source of truth for desired database state. DbState connects that repository to a target PostgreSQL database through explicit capture, comparison, and review workflows."
+      />
+      <div class="mt-8 rounded-lg border border-border bg-surface p-4">
+        <ol class="grid gap-3">
+          {
+            operatingModelSteps.map((step, index) => (
+              <li class="grid gap-3 rounded-md border border-border bg-bg-muted p-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]">
+                <span class="font-mono text-sm font-semibold text-accent">
+                  {(index + 1).toString().padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 class="font-semibold text-text">{step.title}</h3>
+                  <p class="mt-1 text-sm leading-6 text-text-muted">
+                    {step.description}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+
+    <div
+      class="rounded-lg border border-border bg-surface p-4"
+      aria-label="DbState operating model"
+    >
+      <p
+        class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+      >
+        Product model
+      </p>
+      <div class="mt-5 grid gap-3">
+        <div
+          class="rounded-md border border-border bg-bg-muted p-4 text-center"
+        >
+          <p class="font-mono text-sm font-semibold text-text">
+            PostgreSQL Database
+          </p>
+          <p class="mt-2 text-xs text-text-soft">
+            metadata and selected reference-data rows
+          </p>
+        </div>
+        <div
+          class="text-center font-mono text-xl text-accent"
+          aria-hidden="true"
+        >
+          ↕
+        </div>
+        <div
+          class="rounded-md border border-accent/50 bg-accent-soft p-4 text-center"
+        >
+          <p class="font-mono text-sm font-semibold text-text">DbState</p>
+          <p class="mt-2 text-xs text-text-soft">
+            capture, compare, diff, and plan
+          </p>
+        </div>
+        <div
+          class="text-center font-mono text-xl text-accent"
+          aria-hidden="true"
+        >
+          ↕
+        </div>
+        <div
+          class="rounded-md border border-border bg-bg-muted p-4 text-center"
+        >
+          <p class="font-mono text-sm font-semibold text-text">
+            Git Repository Desired State
+          </p>
+          <p class="mt-2 text-xs text-text-soft">
+            object files and reference-data YAML
+          </p>
+        </div>
+        <div
+          class="text-center font-mono text-xl text-review"
+          aria-hidden="true"
+        >
+          ↓
+        </div>
+        <div
+          class="rounded-md border border-border-strong bg-bg-muted p-4 text-center"
+        >
+          <p class="font-mono text-sm font-semibold text-text">Release Plan</p>
+          <p class="mt-2 text-xs text-text-soft">
+            selected supported candidates
+          </p>
+        </div>
+        <div
+          class="text-center font-mono text-xl text-review"
+          aria-hidden="true"
+        >
+          ↓
+        </div>
+        <div
+          class="rounded-md border border-review/50 bg-review-soft p-4 text-center"
+        >
+          <p class="font-mono text-sm font-semibold text-text">
+            Review-only Release Artifacts
+          </p>
+          <p class="mt-2 text-xs text-text-soft">
+            database execution occurs outside DbState
+          </p>
+        </div>
+      </div>
+      <p class="sr-only">
+        PostgreSQL Database connects both directions to DbState. DbState
+        connects both directions to Git Repository Desired State. The repository
+        then leads to a Release Plan and review-only release artifacts.
+      </p>
+    </div>
+  </div>
+</SectionContainer>

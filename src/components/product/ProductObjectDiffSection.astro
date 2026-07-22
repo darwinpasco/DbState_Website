@@ -1,0 +1,51 @@
+---
+import { productScreenshots } from "../../data/productScreenshots";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import ProductScreenshotFigure from "./ProductScreenshotFigure.astro";
+
+const objectDiffScreenshot = productScreenshots.find(
+  (screenshot) => screenshot.id === "object-diff",
+);
+---
+
+<SectionContainer ariaLabelledby="object-diff-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="object-diff-heading"
+        eyebrow="Object Diff"
+        title="Inspect the object, not just the status."
+        description="Comparison state alone is not enough. Object Diff exposes the repository and database definitions for a selected object so reviewers can understand the difference before deciding whether it belongs in a Release Plan or requires manual review."
+      />
+      <div class="mt-6 rounded-lg border border-border-strong bg-surface p-4">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+        >
+          Review target
+        </p>
+        <p class="mt-3 text-sm leading-6 text-text-muted">
+          The screenshot shows a real <code class="font-mono text-text">
+            public.actor
+          </code>{" "}
+          table difference with a repository-only nullable{" "}
+          <code class="font-mono text-text">dbstate_demo_note</code> column. DbState
+          does not automatically resolve the difference.
+        </p>
+      </div>
+    </div>
+
+    {
+      objectDiffScreenshot && (
+        <ProductScreenshotFigure
+          id="product-object-diff"
+          title={objectDiffScreenshot.title}
+          description={objectDiffScreenshot.description}
+          alt={objectDiffScreenshot.alt}
+          image={objectDiffScreenshot.image}
+          sizes="(min-width: 1180px) 720px, calc(100vw - 2rem)"
+        />
+      )
+    }
+  </div>
+</SectionContainer>

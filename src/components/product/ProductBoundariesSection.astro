@@ -1,0 +1,29 @@
+---
+import { productBoundaries } from "../../data/productPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="product-boundaries-heading">
+  <SectionHeading
+    id="product-boundaries-heading"
+    eyebrow="Current boundaries"
+    title="Deliberately local and review-first."
+    description="Current Private Beta boundaries are product decisions. DbState is focused on local PostgreSQL review workflows where the user remains in control of Git history and database execution."
+  />
+
+  <div class="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+    {
+      productBoundaries.map((boundary) => (
+        <article class="rounded-lg border border-border bg-surface p-4">
+          <h3 class="font-mono text-sm font-semibold text-text">
+            {boundary.title}
+          </h3>
+          <p class="mt-3 text-sm leading-6 text-text-muted">
+            {boundary.description}
+          </p>
+        </article>
+      ))
+    }
+  </div>
+</SectionContainer>

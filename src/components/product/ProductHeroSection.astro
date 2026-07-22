@@ -1,0 +1,89 @@
+---
+import SectionContainer from "../layout/SectionContainer.astro";
+import CtaLink from "../ui/CtaLink.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer class="pt-16 md:pt-24" ariaLabelledby="product-hero-heading">
+  <div
+    class="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(20rem,0.65fr)] lg:items-center"
+  >
+    <div class="max-w-3xl">
+      <p
+        class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+      >
+        Git-native database state management
+      </p>
+      <h1
+        id="product-hero-heading"
+        class="mt-4 text-4xl font-semibold tracking-normal text-text md:text-6xl"
+      >
+        Database state belongs in the repository.
+      </h1>
+      <p class="mt-6 max-w-2xl text-lg leading-8 text-text-muted">
+        DbState compares PostgreSQL database state with the desired state
+        defined in Git. It helps teams capture database objects as files, review
+        schema and reference-data differences, and prepare release artifacts
+        without directly applying changes.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <CtaLink href="/private-beta" label="Request Private Beta Access" />
+        <CtaLink
+          href="#workflow-model"
+          label="See the workflow model"
+          variant="secondary"
+        />
+      </div>
+      <p class="mt-5 font-mono text-sm text-text-soft">
+        Database execution stays outside DbState.
+      </p>
+    </div>
+
+    <aside
+      class="rounded-lg border border-border bg-surface p-5"
+      aria-label="Product scope summary"
+    >
+      <StatusBadge label="Private Beta scope" />
+      <dl class="mt-5 grid gap-3">
+        <div class="rounded-md border border-border bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            State model
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-text">
+            Git repository desired state
+          </dd>
+        </div>
+        <div class="rounded-md border border-border bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            Database
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-text">PostgreSQL</dd>
+        </div>
+        <div class="rounded-md border border-border bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            Current runtime
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-text">
+            Local Windows service and browser UI
+          </dd>
+        </div>
+        <div class="rounded-md border border-border-strong bg-bg-muted p-3">
+          <dt
+            class="font-mono text-xs uppercase tracking-normal text-text-soft"
+          >
+            Release boundary
+          </dt>
+          <dd class="mt-1 text-sm font-semibold text-review">
+            Review-only handoff
+          </dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+</SectionContainer>
