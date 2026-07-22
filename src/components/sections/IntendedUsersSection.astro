@@ -5,19 +5,62 @@ import SectionHeading from "../layout/SectionHeading.astro";
 ---
 
 <SectionContainer ariaLabelledby="intended-users-heading">
-  <SectionHeading
-    id="intended-users-heading"
-    eyebrow="Intended users"
-    title="Built for teams that review database state with the same discipline as code."
-    description="The initial site foundation keeps the audience concrete and avoids unsupported claims about deployment automation."
-  />
-  <ul class="mt-8 grid gap-3 md:grid-cols-2">
-    {
-      intendedUsers.map((user) => (
-        <li class="rounded-md border border-border bg-surface p-4 text-sm leading-6 text-text-muted">
-          {user}
-        </li>
-      ))
-    }
-  </ul>
+  <div class="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+    <SectionHeading
+      id="intended-users-heading"
+      eyebrow="Intended users"
+      title="For teams that need database discipline."
+      description="DbState is designed for technical teams that already manage PostgreSQL schema or reference-data changes and want those changes to be easier to inspect through Git-based review."
+    />
+
+    <div class="rounded-lg border border-border bg-surface p-3 md:p-4">
+      <div
+        class="hidden grid-cols-[0.72fr_1fr_1fr] gap-3 border-b border-border pb-3 md:grid"
+        aria-hidden="true"
+      >
+        <p class="font-mono text-xs uppercase tracking-normal text-text-soft">
+          Role
+        </p>
+        <p class="font-mono text-xs uppercase tracking-normal text-text-soft">
+          Current problem
+        </p>
+        <p class="font-mono text-xs uppercase tracking-normal text-text-soft">
+          How DbState helps
+        </p>
+      </div>
+
+      <div class="grid gap-3 pt-0 md:pt-3">
+        {
+          intendedUsers.map((user) => (
+            <article class="grid gap-3 rounded-md border border-border bg-bg-muted p-4 md:grid-cols-[0.72fr_1fr_1fr]">
+              <div>
+                <p class="font-mono text-xs uppercase tracking-normal text-text-soft md:hidden">
+                  Role
+                </p>
+                <h3 class="mt-1 text-base font-semibold leading-6 text-text md:mt-0">
+                  {user.role}
+                </h3>
+              </div>
+              <div>
+                <p class="font-mono text-xs uppercase tracking-normal text-text-soft md:hidden">
+                  Current problem
+                </p>
+                <p class="mt-1 text-sm leading-6 text-text-muted md:mt-0">
+                  {user.need}
+                </p>
+              </div>
+              <div>
+                <p class="font-mono text-xs uppercase tracking-normal text-text-soft md:hidden">
+                  How DbState helps
+                </p>
+                <p class="mt-1 text-sm leading-6 text-text-muted md:mt-0">
+                  {user.value}
+                </p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
 </SectionContainer>

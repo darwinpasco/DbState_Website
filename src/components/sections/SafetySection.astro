@@ -1,24 +1,66 @@
 ---
+import {
+  safetyCommitments,
+  safetyTechnicalBoundaries,
+} from "../../data/homepage";
 import SectionContainer from "../layout/SectionContainer.astro";
 import SectionHeading from "../layout/SectionHeading.astro";
 import StatusBadge from "../ui/StatusBadge.astro";
 ---
 
 <SectionContainer ariaLabelledby="safety-heading">
-  <div class="grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-start">
-    <SectionHeading
-      id="safety-heading"
-      eyebrow="Review-first safety"
-      title="DbState prepares review context, not database deployment."
-      description="Current safety commitments are treated as product boundaries. Release artifacts are generated for review and manual execution outside DbState."
-    />
-    <div class="rounded-lg border border-border bg-surface p-5">
-      <div class="grid gap-3">
-        <StatusBadge label="No direct database apply" tone="safe" />
-        <StatusBadge label="No generated SQL execution" tone="safe" />
-        <StatusBadge label="No automatic Git commits" tone="safe" />
-        <StatusBadge label="Review-only release artifacts" tone="review" />
+  <div class="grid gap-10">
+    <div class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+      <SectionHeading
+        id="safety-heading"
+        eyebrow="Review-first safety"
+        title="Review-first by design."
+        description="DbState helps teams understand and prepare database changes. It inspects, compares, writes explicitly approved repository files, and generates review-only artifacts, but it does not directly execute database changes."
+      />
+
+      <div class="grid gap-4">
+        {
+          safetyCommitments.map((commitment, index) => (
+            <article class="rounded-lg border border-border bg-surface p-4 md:p-5">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="font-mono text-xs uppercase tracking-normal text-text-soft">
+                    Boundary 0{index + 1}
+                  </p>
+                  <h3 class="mt-2 text-lg font-semibold leading-6 text-text">
+                    {commitment.title}
+                  </h3>
+                </div>
+                <StatusBadge label={commitment.label} tone="safe" />
+              </div>
+              <p class="mt-4 text-sm leading-6 text-text-muted">
+                {commitment.summary}
+              </p>
+              <p class="mt-3 text-sm leading-6 text-text-soft">
+                {commitment.detail}
+              </p>
+            </article>
+          ))
+        }
       </div>
     </div>
+
+    <aside class="rounded-lg border border-border bg-bg-muted p-4 md:p-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-mono text-sm font-semibold text-text">
+          Current technical boundaries
+        </h3>
+        <StatusBadge label="review-only operating model" tone="review" />
+      </div>
+      <ul class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          safetyTechnicalBoundaries.map((boundary) => (
+            <li class="rounded-sm border border-border bg-surface px-3 py-2 text-sm leading-6 text-text-muted">
+              {boundary}
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
   </div>
 </SectionContainer>

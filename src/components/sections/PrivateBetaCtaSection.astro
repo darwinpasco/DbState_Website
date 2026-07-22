@@ -1,31 +1,64 @@
 ---
+import { privateBetaScope } from "../../data/homepage";
 import { primaryCta } from "../../data/navigation";
 import SectionContainer from "../layout/SectionContainer.astro";
 import CtaLink from "../ui/CtaLink.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
 ---
 
 <SectionContainer ariaLabelledby="private-beta-heading" class="pb-20">
   <div
-    class="rounded-lg border border-border-strong bg-surface-strong p-6 md:p-8"
+    class="grid gap-8 rounded-lg border border-border-strong bg-surface-strong p-6 md:p-8 lg:grid-cols-[1fr_0.82fr] lg:items-center"
   >
-    <p
-      class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
-    >
-      Private Beta
-    </p>
-    <h2
-      id="private-beta-heading"
-      class="mt-3 text-2xl font-semibold text-text md:text-3xl"
-    >
-      Request access when your team is ready to review database state in Git.
-    </h2>
-    <p class="mt-4 max-w-2xl text-base leading-7 text-text-muted">
-      The public website foundation links to the Private Beta route, but form
-      submission is intentionally deferred until the product and intake process
-      are defined.
-    </p>
-    <div class="mt-6">
-      <CtaLink href={primaryCta.href} label={primaryCta.label} />
+    <div>
+      <p
+        class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+      >
+        Private Beta
+      </p>
+      <h2
+        id="private-beta-heading"
+        class="mt-3 text-2xl font-semibold text-text md:text-3xl"
+      >
+        Join the DbState Private Beta.
+      </h2>
+      <p class="mt-4 max-w-2xl text-base leading-7 text-text-muted">
+        DbState Private Beta is currently focused on PostgreSQL and local
+        Git-based workflows. Participants receive early access to the Windows
+        build and can help shape the product before broader release.
+      </p>
+      <p class="mt-5 max-w-2xl text-sm leading-6 text-text-muted">
+        Private Beta is intended for developers, database engineers, and
+        technical teams actively managing PostgreSQL schema or reference-data
+        changes through Git.
+      </p>
+      <p class="mt-4 max-w-2xl font-mono text-xs leading-6 text-text-soft">
+        Team collaboration, hosted workflows, and server-based deployment are
+        not part of the current Private Beta.
+      </p>
+      <div class="mt-7">
+        <CtaLink href={primaryCta.href} label={primaryCta.label} />
+      </div>
     </div>
+
+    <aside class="rounded-lg border border-border bg-surface p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-mono text-sm font-semibold text-text">
+          Current beta scope
+        </h3>
+        <StatusBadge label="controlled scope" tone="review" />
+      </div>
+      <ul class="mt-4 grid gap-2">
+        {
+          privateBetaScope.map((item) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2">
+              <span class="break-words font-mono text-sm text-text-muted">
+                {item}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
   </div>
 </SectionContainer>

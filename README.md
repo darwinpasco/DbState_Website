@@ -9,12 +9,13 @@ DbState is not a direct database deployment tool.
 ## Technology Stack
 
 - Astro with static site output
+- Astro Cloudflare adapter for Worker deployment
 - TypeScript in strict mode
 - Tailwind CSS through the official `@tailwindcss/vite` integration
 - npm
 - Prettier with Astro formatting support
 
-No client framework, component library, analytics, backend, authentication, or deployment adapter is included in this foundation.
+No client framework, component library, analytics, backend service, or authentication is included in this foundation.
 
 ## Prerequisites
 
@@ -103,7 +104,29 @@ Do not add unsupported database engines, deployment automation claims, fake cust
 
 ## Metadata and Deployment Notes
 
-The production domain and deployment provider are not yet selected.
+Cloudflare Workers is the selected deployment target for the DbState website.
+
+Astro retains static output. `npm run build` generates the production build under `dist/`, including static assets used by the Cloudflare Worker:
+
+```sh
+npm run build
+```
+
+The Astro Cloudflare adapter is used for Worker deployment. `wrangler.jsonc` configures the Astro Cloudflare Worker entry point and binds `dist/` as the static asset directory.
+
+Local Cloudflare-compatible preview:
+
+```sh
+npm run preview
+```
+
+Deployment commands:
+
+```sh
+npm run deploy
+```
+
+Cloudflare branch builds may use `wrangler versions upload`. Production deployment uses `wrangler deploy`.
 
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
@@ -120,4 +143,4 @@ The default robots metadata is currently `noindex, nofollow`, appropriate for a 
 - Private Beta form submission is not implemented in this task.
 - Documentation architecture and content collections are not implemented yet.
 - Real product screenshots are not included yet.
-- Hosting, deployment configuration, analytics, cookies, authentication, and backend services are intentionally out of scope.
+- Analytics, cookies, authentication, and backend services are intentionally out of scope.
