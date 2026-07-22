@@ -1,0 +1,64 @@
+---
+import {
+  postgresSafetyScopeLimitations,
+  privateBetaIncluded,
+  privateBetaNotIncluded,
+} from "../../data/safetyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="private-beta-safety-heading">
+  <SectionHeading
+    id="private-beta-safety-heading"
+    eyebrow="Private Beta scope"
+    title="Current Private Beta safety scope."
+    description="The current safety model is scoped to local PostgreSQL workflows where repository state, database comparison, release handoff, and Git history remain explicit."
+  />
+
+  <div class="mt-8 grid gap-4 lg:grid-cols-2">
+    <article class="rounded-lg border border-border bg-surface p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-semibold text-text">Included</h3>
+        <StatusBadge label="current scope" tone="safe" />
+      </div>
+      <ul class="mt-4 grid gap-2">
+        {
+          privateBetaIncluded.map((item) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm text-text-muted">
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+
+    <article class="rounded-lg border border-border bg-surface p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-semibold text-text">Not included</h3>
+        <StatusBadge label="outside current beta" tone="review" />
+      </div>
+      <ul class="mt-4 grid gap-2">
+        {
+          privateBetaNotIncluded.map((item) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm text-text-muted">
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </div>
+
+  <aside class="mt-4 rounded-lg border border-border bg-bg-muted p-4">
+    <p
+      class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+    >
+      PostgreSQL object limitation
+    </p>
+    <p class="mt-3 text-sm leading-6 text-text-muted">
+      {postgresSafetyScopeLimitations}
+    </p>
+  </aside>
+</SectionContainer>

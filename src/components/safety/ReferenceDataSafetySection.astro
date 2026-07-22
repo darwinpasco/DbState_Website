@@ -1,0 +1,39 @@
+---
+import { referenceDataSafetyPoints } from "../../data/safetyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="reference-data-safety-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="reference-data-safety-heading"
+        eyebrow="Reference data"
+        title="Reference-data comparison is conservative."
+        description="Reference-data workflows start with explicit table selection and comparison rules. Repository-to-Database reference-data comparison remains read-only in the current Private Beta."
+      />
+      <aside
+        class="mt-6 rounded-lg border border-border-strong bg-bg-muted p-4"
+      >
+        <StatusBadge label="no automatic data DML" tone="review" />
+        <p class="mt-4 text-sm leading-6 text-text-muted">
+          A database-only row may still be referenced by foreign keys or retain
+          historical meaning. DbState does not treat removal as automatically
+          safe.
+        </p>
+      </aside>
+    </div>
+
+    <ul class="grid gap-3">
+      {
+        referenceDataSafetyPoints.map((point) => (
+          <li class="rounded-md border border-border bg-surface p-4 text-sm leading-6 text-text-muted">
+            {point}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</SectionContainer>
