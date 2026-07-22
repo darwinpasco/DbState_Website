@@ -1,13 +1,69 @@
 ---
+import {
+  postgresqlCapabilityGroups,
+  postgresqlScopeLimitations,
+} from "../../data/homepage";
 import SectionContainer from "../layout/SectionContainer.astro";
 import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
 ---
 
 <SectionContainer ariaLabelledby="postgresql-scope-heading">
-  <SectionHeading
-    id="postgresql-scope-heading"
-    eyebrow="PostgreSQL scope"
-    title="Focused on PostgreSQL teams."
-    description="DbState currently speaks to PostgreSQL workflows: database comparison, repository capture, selected reference data in YAML, object-level and row-level review, and review-only release artifacts."
-  />
+  <div class="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="postgresql-scope-heading"
+        eyebrow="PostgreSQL scope"
+        title="Built for real PostgreSQL schemas."
+        description="DbState Private Beta covers more than tables and columns. It understands a meaningful set of PostgreSQL object types needed for application and database engineering workflows."
+      />
+      <div class="mt-6 flex flex-wrap gap-2">
+        <StatusBadge label="Private Beta starts with PostgreSQL" />
+        <StatusBadge label="local Git workflow" tone="safe" />
+      </div>
+      <p class="mt-5 max-w-2xl text-sm leading-6 text-text-muted">
+        The database-state model is designed to expand to additional relational
+        database engines over time.
+      </p>
+    </div>
+
+    <div class="grid gap-4">
+      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {
+          postgresqlCapabilityGroups.map((group) => (
+            <article class="rounded-lg border border-border bg-surface p-4">
+              <h3 class="font-mono text-sm font-semibold text-text">
+                {group.category}
+              </h3>
+              <ul class="mt-4 grid gap-2">
+                {group.objects.map((objectName) => (
+                  <li class="rounded-sm border border-border bg-bg-muted px-3 py-2">
+                    <span class="break-words text-sm text-text-muted">
+                      {objectName}
+                    </span>
+                    {objectName === "Row-level security policies" && (
+                      <span class="mt-1 block font-mono text-xs text-text-soft">
+                        RLS policies
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+
+      <aside class="rounded-lg border border-border bg-bg-muted p-4">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+        >
+          Current scope note
+        </p>
+        <p class="mt-3 text-sm leading-6 text-text-muted">
+          {postgresqlScopeLimitations}
+        </p>
+      </aside>
+    </div>
+  </div>
 </SectionContainer>
