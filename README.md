@@ -14,7 +14,7 @@ DbState is not a direct database deployment tool.
 - npm
 - Prettier with Astro formatting support
 
-No client framework, component library, analytics, backend, authentication, or deployment adapter is included in this foundation.
+No client framework, component library, analytics, backend, or authentication is included in this foundation.
 
 ## Prerequisites
 
@@ -103,7 +103,24 @@ Do not add unsupported database engines, deployment automation claims, fake cust
 
 ## Metadata and Deployment Notes
 
-The production domain and deployment provider are not yet selected.
+Cloudflare Workers is the selected deployment target for the static DbState website.
+
+Astro generates static output under `dist/`:
+
+```sh
+npm run build
+```
+
+`wrangler.jsonc` identifies `dist/` as the Worker static assets directory. There is no Worker script entry point for this site.
+
+Cloudflare Workers build commands:
+
+```sh
+npx wrangler versions upload
+npx wrangler deploy
+```
+
+Non-production Cloudflare builds use `wrangler versions upload`. Production Cloudflare builds use `wrangler deploy`.
 
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
@@ -120,4 +137,4 @@ The default robots metadata is currently `noindex, nofollow`, appropriate for a 
 - Private Beta form submission is not implemented in this task.
 - Documentation architecture and content collections are not implemented yet.
 - Real product screenshots are not included yet.
-- Hosting, deployment configuration, analytics, cookies, authentication, and backend services are intentionally out of scope.
+- Analytics, cookies, authentication, and backend services are intentionally out of scope.
