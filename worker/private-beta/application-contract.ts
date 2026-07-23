@@ -8,6 +8,13 @@ export const SUCCESS_RESPONSE_STATUS = "received";
 export const STATUS_HISTORY_CHANGED_BY = "system";
 export const STATUS_HISTORY_INITIAL_NOTE = "Application received";
 export const APPLICATION_SOURCE = "website";
+export const TURNSTILE_SITEVERIFY_URL =
+  "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+export const TURNSTILE_EXPECTED_ACTION = "private-beta-application";
+export const TURNSTILE_EXPECTED_HOSTNAMES = ["dbstate.com", "www.dbstate.com"];
+export const TURNSTILE_SITE_KEY = "0x4AAAAAAD7ybcKG7AdVbfGm";
+export const TURNSTILE_TOKEN_MAX_LENGTH = 2048;
+export const TURNSTILE_TIMEOUT_MS = 5_000;
 
 export const workflowValues = [
   "schema-database-to-repository",
@@ -57,11 +64,12 @@ export interface PrivateBetaApplicationRequest {
   evaluationGoals: string;
   processingConsent: true;
   futureUpdatesOptIn?: boolean;
+  turnstileToken: string;
 }
 
 export interface NormalizedPrivateBetaApplicationRequest extends Omit<
   PrivateBetaApplicationRequest,
-  "futureUpdatesOptIn" | "processingConsent"
+  "futureUpdatesOptIn" | "processingConsent" | "turnstileToken"
 > {
   processingConsent: true;
   futureUpdatesOptIn: boolean;
@@ -112,4 +120,5 @@ export const allowedRequestFields = [
   "managesReferenceDataInGit",
   "processingConsent",
   "futureUpdatesOptIn",
+  "turnstileToken",
 ] as const;

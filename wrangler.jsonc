@@ -5,6 +5,9 @@
   "compatibility_date": "2026-07-22",
   "vars": {
     "PRIVATE_BETA_INTAKE_MODE": "disabled",
+    "TURNSTILE_EXPECTED_ACTION": "private-beta-application",
+    "TURNSTILE_EXPECTED_HOSTNAMES": "dbstate.com,www.dbstate.com",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAD7ybcKG7AdVbfGm",
   },
   "assets": {
     "directory": "./dist",

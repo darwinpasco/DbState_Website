@@ -2,6 +2,7 @@ import {
   allowedRequestFields,
   managesReferenceDataInGitValues,
   stringFieldLimits,
+  TURNSTILE_TOKEN_MAX_LENGTH,
   workflowValues,
   type FirstWorkflow,
   type ManagesReferenceDataInGit,
@@ -12,14 +13,24 @@ import {
 export interface ValidationSuccess {
   ok: true;
   value: NormalizedPrivateBetaApplicationRequest;
+  turnstileToken: string;
 }
 
-export interface ValidationFailure {
+export interface FieldValidationFailure {
   ok: false;
+  kind: "fields";
   fields: Record<string, string>;
 }
 
-export type ValidationResult = ValidationSuccess | ValidationFailure;
+export interface TurnstileTokenValidationFailure {
+  ok: false;
+  kind: "turnstile";
+  code: "turnstile_required" | "turnstile_invalid";
+  message: string;
+}
+
+export type ValidationResult =
+  ValidationSuccess | FieldValidationFailure | TurnstileTokenValidationFailure;
 
 const allowedFields = new Set<string>(allowedRequestFields);
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -110,6 +121,7 @@ export function validateApplicationRequest(input: unknown): ValidationResult {
   if (!isRecord(input)) {
     return {
       ok: false,
+      kind: "fields",
       fields: {
         request: "Expected a JSON object.",
       },
@@ -206,12 +218,56 @@ export function validateApplicationRequest(input: unknown): ValidationResult {
   if (Object.keys(errors).length > 0) {
     return {
       ok: false,
+      kind: "fields",
       fields: errors,
+    };
+  }
+
+  const rawTurnstileToken = input.turnstileToken;
+
+  if (rawTurnstileToken === undefined) {
+    return {
+      ok: false,
+      kind: "turnstile",
+      code: "turnstile_required",
+      message: "Complete the verification before submitting the application.",
+    };
+  }
+
+  if (typeof rawTurnstileToken !== "string") {
+    return {
+      ok: false,
+      kind: "turnstile",
+      code: "turnstile_invalid",
+      message:
+        "The verification could not be confirmed. Refresh the verification and try again.",
+    };
+  }
+
+  const turnstileToken = rawTurnstileToken.trim();
+
+  if (turnstileToken.length === 0) {
+    return {
+      ok: false,
+      kind: "turnstile",
+      code: "turnstile_required",
+      message: "Complete the verification before submitting the application.",
+    };
+  }
+
+  if (turnstileToken.length > TURNSTILE_TOKEN_MAX_LENGTH) {
+    return {
+      ok: false,
+      kind: "turnstile",
+      code: "turnstile_invalid",
+      message:
+        "The verification could not be confirmed. Refresh the verification and try again.",
     };
   }
 
   return {
     ok: true,
+    turnstileToken,
     value: {
       fullName: fullName!,
       workEmail: workEmail!.toLowerCase(),

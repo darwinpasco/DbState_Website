@@ -18,6 +18,12 @@ declare global {
       PRIVATE_BETA_INTAKE_MODE: string;
       PRIVATE_BETA_DB: D1DatabaseLike;
       TEST_MIGRATIONS: D1Migration[];
+      TURNSTILE_EXPECTED_ACTION: string;
+      TURNSTILE_EXPECTED_HOSTNAMES: string;
+      TURNSTILE_SECRET_KEY: string;
+      TURNSTILE_SITE_KEY: string;
+      TURNSTILE_SITEVERIFY_FETCH?: typeof fetch;
+      TURNSTILE_SITEVERIFY_TIMEOUT_MS?: string;
     }
   }
 }

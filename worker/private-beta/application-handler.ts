@@ -10,15 +10,21 @@ import {
 import { persistApplication } from "./application-repository";
 import { validateApplicationRequest } from "./application-validation";
 import { errorResponse, jsonResponse } from "./http-responses";
+import {
+  validateTurnstileToken,
+  type SiteverifyFetch,
+  type TurnstileEnv,
+} from "./turnstile-validation";
 
 export interface AssetFetcherLike {
   fetch(request: Request): Response | Promise<Response>;
 }
 
-export interface WorkerEnv {
+export interface WorkerEnv extends TurnstileEnv {
   ASSETS: AssetFetcherLike;
   PRIVATE_BETA_INTAKE_MODE?: string;
   PRIVATE_BETA_DB?: D1DatabaseLike;
+  TURNSTILE_SITEVERIFY_FETCH?: SiteverifyFetch;
 }
 
 function isJsonContentType(contentType: string | null) {
@@ -109,19 +115,11 @@ export async function handlePrivateBetaApplication(
     );
   }
 
-  if (intakeMode !== "test") {
+  if (intakeMode !== "test" && intakeMode !== "enabled") {
     return errorResponse(
       503,
       "intake_not_configured",
       "Private Beta application intake is not configured.",
-    );
-  }
-
-  if (!isOriginAllowed(request)) {
-    return errorResponse(
-      403,
-      "origin_not_allowed",
-      "Requests from this origin are not allowed.",
     );
   }
 
@@ -133,6 +131,14 @@ export async function handlePrivateBetaApplication(
     );
   }
 
+  if (!isOriginAllowed(request)) {
+    return errorResponse(
+      403,
+      "origin_not_allowed",
+      "Requests from this origin are not allowed.",
+    );
+  }
+
   const parsedBody = await readJsonRequestBody(request);
   if (parsedBody.ok === false) {
     return parsedBody.response;
@@ -140,11 +146,28 @@ export async function handlePrivateBetaApplication(
 
   const validation = validateApplicationRequest(parsedBody.value);
   if (validation.ok === false) {
+    if (validation.kind === "turnstile") {
+      return errorResponse(422, validation.code, validation.message);
+    }
+
     return errorResponse(
       422,
       "validation_failed",
       "Application request validation failed.",
       validation.fields,
+    );
+  }
+
+  const turnstileValidation = await validateTurnstileToken(
+    validation.turnstileToken,
+    env,
+  );
+
+  if (turnstileValidation.ok === false) {
+    return errorResponse(
+      turnstileValidation.status,
+      turnstileValidation.code,
+      turnstileValidation.message,
     );
   }
 
