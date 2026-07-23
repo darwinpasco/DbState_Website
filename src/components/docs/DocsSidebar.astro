@@ -1,0 +1,64 @@
+---
+import {
+  getDocsSlug,
+  getDocsUrl,
+  type DocsNavigationGroup,
+} from "../../utils/docs";
+
+type Props = {
+  groups: DocsNavigationGroup[];
+  currentSlug?: string;
+};
+
+const { groups, currentSlug } = Astro.props;
+---
+
+<nav
+  aria-label="Documentation navigation"
+  class="rounded-lg border border-border bg-surface/70 p-4"
+>
+  <p
+    class="font-mono text-xs font-semibold uppercase tracking-normal text-text-soft"
+  >
+    Documentation
+  </p>
+  <div class="mt-5 space-y-6">
+    {
+      groups.map((group) => (
+        <section
+          aria-labelledby={`docs-nav-${group.section.toLowerCase().replaceAll(" ", "-")}`}
+        >
+          <h2
+            id={`docs-nav-${group.section.toLowerCase().replaceAll(" ", "-")}`}
+            class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+          >
+            {group.section}
+          </h2>
+          <ul class="mt-2 space-y-1">
+            {group.entries.map((entry) => {
+              const isCurrent = getDocsSlug(entry) === currentSlug;
+
+              return (
+                <li>
+                  <a
+                    href={getDocsUrl(entry)}
+                    aria-current={isCurrent ? "page" : undefined}
+                    class:list={[
+                      "block rounded-md border px-3 py-2 text-sm leading-6 transition-colors",
+                      isCurrent
+                        ? "border-accent bg-accent-soft text-text"
+                        : "border-transparent text-text-muted hover:border-border-strong hover:bg-surface-strong hover:text-text",
+                    ]}
+                  >
+                    <span>{entry.data.title}</span>
+                    {isCurrent && <span class="sr-only">, current page</span>}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</nav>
