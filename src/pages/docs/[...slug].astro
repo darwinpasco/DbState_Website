@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from "astro:content";
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import {
+  getDocsPager,
+  getDocsSlug,
+  getPublishedDocs,
+  groupDocsBySection,
+  type DocsEntry,
+} from "../../utils/docs";
+
+type Props = {
+  entry: DocsEntry;
+  entries: DocsEntry[];
+};
+
+export async function getStaticPaths() {
+  const entries = getPublishedDocs(await getCollection("docs"));
+
+  return entries.map((entry) => ({
+    params: { slug: getDocsSlug(entry) },
+    props: { entry, entries },
+  }));
+}
+
+const { entry, entries } = Astro.props;
+const { Content } = await render(entry);
+const slug = getDocsSlug(entry);
+const groups = groupDocsBySection(entries);
+const { previous, next } = getDocsPager(entries, entry);
+---
+
+<DocsLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  section={entry.data.section}
+  canonicalPath={`/docs/${slug}/`}
+  groups={groups}
+  currentSlug={slug}
+  previous={previous}
+  next={next}
+>
+  <Content />
+</DocsLayout>
