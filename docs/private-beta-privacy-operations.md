@@ -1,6 +1,6 @@
 # Private Beta Privacy Operations
 
-This runbook documents operational handling for DbState Private Beta applicant data. It does not implement an administrative endpoint, automated deletion, email notification, or public intake enablement.
+This runbook documents operational handling for DbState Private Beta applicant data. It does not implement an administrative endpoint, automated deletion, applicant acknowledgment email, notification retry, or public intake enablement.
 
 Public intake remains disabled. Do not deploy, apply migrations, install secrets, or run remote D1 write operations from routine website validation.
 
@@ -82,6 +82,31 @@ A future scheduled retention process should:
 - Never email applicant content in logs
 
 Automated retention enforcement is not implemented in this slice.
+
+## Internal Notification Email
+
+After a future valid application is durably persisted, DbState sends one
+minimal internal notification through the `PRIVATE_BETA_EMAIL` Worker binding.
+
+The notification is restricted to:
+
+- Application reference
+- Applicant name
+- Work email
+- Company, team, or project
+- Role
+- First workflow selected
+- PostgreSQL versions
+- Submission timestamp
+- Retention date
+
+The notification must not include full free-text application narratives,
+customer data, Turnstile tokens, Turnstile secrets, consent wording, raw request
+bodies, or full application records.
+
+Do not forward notification emails outside the application-review process.
+Notification failure does not remove the persisted application record and does
+not trigger automatic retry in this slice.
 
 ## Incident Handling
 

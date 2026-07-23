@@ -17,6 +17,10 @@ declare global {
       ASSETS: AssetFetcherLike;
       PRIVATE_BETA_INTAKE_MODE: string;
       PRIVATE_BETA_DB: D1DatabaseLike;
+      PRIVATE_BETA_EMAIL: WorkerEnv["PRIVATE_BETA_EMAIL"];
+      PRIVATE_BETA_NOTIFICATION_TO: string;
+      PRIVATE_BETA_EMAIL_FROM: string;
+      PRIVATE_BETA_EMAIL_REPLY_TO: string;
       TEST_MIGRATIONS: D1Migration[];
       TURNSTILE_EXPECTED_ACTION: string;
       TURNSTILE_EXPECTED_HOSTNAMES: string;
