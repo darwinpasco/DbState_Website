@@ -13,8 +13,10 @@ DbState is not a direct database deployment tool.
 - Tailwind CSS through the official `@tailwindcss/vite` integration
 - npm
 - Prettier with Astro formatting support
+- Playwright for site-wide browser quality checks
+- Vitest with the Cloudflare Workers test pool for Worker-runtime API tests
 
-No client framework, component library, analytics, backend service, or authentication is included in this foundation.
+No client framework, component library, analytics, authentication, or general backend service is included in this foundation.
 
 ## Prerequisites
 
@@ -49,6 +51,7 @@ The local development server defaults to `http://localhost:4321`.
 npm run format:check
 npm run check
 npm run build
+npm run test:worker
 npm run test:e2e
 ```
 
@@ -65,7 +68,31 @@ npm run quality
 ```
 
 `npm run quality` runs formatting verification, Astro and TypeScript checks,
-the production build, and the Playwright browser test suite.
+the production build, Worker-runtime tests, and the Playwright browser test
+suite.
+
+## Worker API Tests
+
+The repository includes a Worker-runtime test suite for the Private Beta
+application API foundation. The suite uses `@cloudflare/vitest-pool-workers`
+with a locally simulated D1 binding named `PRIVATE_BETA_DB`.
+
+```sh
+npm run test:worker
+```
+
+Watch mode:
+
+```sh
+npm run test:worker:watch
+```
+
+The Worker test wrapper keeps Wrangler logs inside the ignored `.wrangler/`
+directory so tests do not depend on a user-profile log path.
+
+The public Private Beta form remains disabled and disconnected. Worker tests
+exercise the backend contract in `PRIVATE_BETA_INTAKE_MODE=test`; production
+configuration remains `PRIVATE_BETA_INTAKE_MODE=disabled`.
 
 ## Browser Quality Gate
 
@@ -158,7 +185,9 @@ Astro generates a fully static site. `npm run build` generates the website under
 npm run build
 ```
 
-`wrangler.jsonc` identifies `dist/` as the Cloudflare Workers static asset directory. There is no Worker runtime entry point for the current website, and the Astro Cloudflare adapter is not required while every route is prerendered.
+`wrangler.jsonc` identifies `dist/` as the Cloudflare Workers static asset directory and configures a minimal Worker entry point for selective API routing. Normal website pages and assets remain asset-first. Only `/api/private-beta-applications` is configured with `assets.run_worker_first`.
+
+The Astro Cloudflare adapter is not required while every public page route is prerendered.
 
 Local Cloudflare-compatible preview:
 
@@ -180,15 +209,15 @@ npm run deploy
 
 Cloudflare branch builds may use `wrangler versions upload`. Production deployment uses `wrangler deploy`.
 
-A Cloudflare adapter or Worker runtime may be reconsidered later only if DbState introduces server-rendered routes, API endpoints, sessions, runtime bindings, or backend form handling.
+The current Worker runtime exists only for the Private Beta application API foundation. Public application intake remains disabled until a later reviewed slice connects form submission and provisions the required Cloudflare resources.
 
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
 ```sh
-SITE_URL=https://example.com npm run build
+SITE_URL=https://dbstate.com npm run build
 ```
 
-Do not use `https://example.com` as the real production value. Replace it with the selected DbState public website domain when that decision is made.
+The canonical production domain is `https://dbstate.com`.
 
 The default robots metadata is currently `noindex, nofollow`, appropriate for a development-stage public website foundation. Revisit this before public launch.
 
@@ -212,5 +241,8 @@ substantial website changes, manually inspect:
 
 ## Deferred Work
 
-- Private Beta form submission is not implemented in this task.
+- Private Beta browser form submission is not implemented in this task.
+- The Private Beta application API is present but production intake is disabled.
+- No remote D1 database has been created or bound yet.
+- Email notifications to `darwin@dbstate.com` from `private-beta@dbstate.com` are documented for later slices only and are not implemented.
 - Analytics, cookies, authentication, and backend services are intentionally out of scope.
