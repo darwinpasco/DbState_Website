@@ -1,0 +1,94 @@
+---
+import type { PrivacySection } from "../../data/privacyPage";
+
+type Props = {
+  section: PrivacySection;
+};
+
+const { section } = Astro.props;
+---
+
+<article
+  id={section.id}
+  class="rounded-lg border border-border bg-surface p-5 md:p-6"
+  aria-labelledby={`${section.id}-heading`}
+>
+  <h2 id={`${section.id}-heading`} class="text-2xl font-semibold text-text">
+    {section.title}
+  </h2>
+
+  {
+    section.paragraphs && (
+      <div class="mt-4 grid gap-4 text-base leading-7 text-text-muted">
+        {section.paragraphs.map((paragraph) => {
+          if (
+            section.id === "cloudflare" &&
+            paragraph.includes("Cloudflare may independently process")
+          ) {
+            return (
+              <p>
+                DbState does not send the applicant IP address as a separate
+                Siteverify parameter. Cloudflare may independently process
+                connection and browser signals as described in its own notices,
+                including the{" "}
+                <a
+                  class="font-medium text-accent underline decoration-accent/60 underline-offset-4 hover:text-text"
+                  href="https://www.cloudflare.com/turnstile-privacy-policy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Cloudflare Turnstile Privacy Addendum
+                </a>{" "}
+                and{" "}
+                <a
+                  class="font-medium text-accent underline decoration-accent/60 underline-offset-4 hover:text-text"
+                  href="https://www.cloudflare.com/privacypolicy/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Cloudflare Privacy Policy
+                </a>
+                . External links open in a new tab.
+              </p>
+            );
+          }
+
+          if (section.id === "contact") {
+            return (
+              <p>
+                Privacy questions and requests:{" "}
+                <a
+                  class="font-medium text-accent underline decoration-accent/60 underline-offset-4 hover:text-text"
+                  href="mailto:darwin@dbstate.com"
+                >
+                  darwin@dbstate.com
+                </a>
+              </p>
+            );
+          }
+
+          return <p>{paragraph}</p>;
+        })}
+      </div>
+    )
+  }
+
+  {
+    section.lists && (
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        {section.lists.map((list) => (
+          <section class="min-w-0 rounded-md border border-border bg-bg-muted p-4">
+            <h3 class="font-mono text-sm font-semibold text-text">
+              {list.title}
+            </h3>
+            <ul class="mt-3 grid gap-2">
+              {list.items.map((item) => (
+                <li class="text-sm leading-6 text-text-muted">{item}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    )
+  }
+</article>

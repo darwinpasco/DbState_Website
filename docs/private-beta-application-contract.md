@@ -37,6 +37,8 @@ The production and preview D1 databases use the single Worker binding `PRIVATE_B
 
 Turnstile operations are documented in [Private Beta Turnstile Operations](./private-beta-turnstile-operations.md). The browser widget is loaded only in public `test` mode or a future public `enabled` mode.
 
+Applicant privacy handling is disclosed on the public `/privacy/` page and operationally documented in [Private Beta Privacy Operations](./private-beta-privacy-operations.md).
+
 ## Public Browser Mode
 
 The static Private Beta page has a separate build-time mode:
@@ -275,6 +277,8 @@ retention_until = submitted_at + 365 days
 
 This slice records the retention date only. It does not add scheduled deletion.
 
+The public Privacy page states that Private Beta application records are assigned a retention date 365 days after submission. Automated retention enforcement remains deferred while public intake is closed.
+
 ## Stored Data Boundaries
 
 The D1 schema does not store:
@@ -290,6 +294,8 @@ The D1 schema does not store:
 ## Later Work Required Before Enabling Intake
 
 Before public intake can be enabled, later reviewed slices must switch both Worker and public page modes through the deployment process, install the production Turnstile secret, run deployment validation, add notification email if approved, and update operational privacy documentation.
+
+The public Privacy page and privacy operations runbook now document the applicant data lifecycle. Future activation work still must verify operational privacy handling before public application submission starts.
 
 This slice does not deploy and does not enable public application submission.
 

@@ -1,5 +1,5 @@
 ---
-import { navigationItems } from "../../data/navigation";
+import { footerNavigationItems } from "../../data/navigation";
 ---
 
 <footer class="border-t border-border bg-bg-muted">
@@ -22,7 +22,7 @@ import { navigationItems } from "../../data/navigation";
       aria-label="Footer navigation"
     >
       {
-        navigationItems.map((item) => (
+        footerNavigationItems.map((item) => (
           <a class="text-sm text-text-muted hover:text-text" href={item.href}>
             {item.label}
           </a>

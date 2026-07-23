@@ -103,6 +103,9 @@ test("skip link, header, footer, anchors, and docs pager are navigable", async (
   expect(focusedLinks.join(" ")).toContain("Request Private Beta Access");
 
   const footerNav = page.getByRole("navigation", { name: "Footer navigation" });
+  await expect(
+    footerNav.getByRole("link", { name: "Privacy" }),
+  ).toHaveAttribute("href", "/privacy");
   await footerNav.getByRole("link", { name: "Docs" }).click();
   expect(normalizeInternalPath(new URL(page.url()).pathname)).toBe("/docs/");
 

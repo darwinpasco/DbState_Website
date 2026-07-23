@@ -58,6 +58,10 @@ export const publicRoutes = [
     h1: "Evaluate DbState with a real PostgreSQL workflow.",
   },
   {
+    path: "/privacy/",
+    h1: "How Private Beta application information is handled.",
+  },
+  {
     path: "/docs/",
     h1: "Work with database state through explicit Git-managed workflows.",
   },
@@ -77,6 +81,7 @@ export const responsivePages = [
   "/product/",
   "/safety/",
   "/private-beta/",
+  "/privacy/",
   "/docs/",
   "/docs/reference-data/",
   "/docs/release-plans/",

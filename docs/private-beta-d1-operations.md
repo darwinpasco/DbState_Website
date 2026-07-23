@@ -99,14 +99,24 @@ Dry runs validate packaging and bindings without deploying or applying migration
 
 In managed local environments where Wrangler cannot write logs under the user profile, set `WRANGLER_LOG_PATH` to an ignored local directory such as `.wrangler/logs`.
 
+## Retention and Privacy Operations
+
+Application rows include a `retention_until` value assigned 365 days after submission. The retention date is metadata for operational lifecycle handling.
+
+Automated retention enforcement is not implemented in this slice. Public intake remains disabled while retention enforcement and other operational controls are reviewed.
+
+Applicant privacy operations, including lookup, correction, deletion, retention review, and incident-handling boundaries, are documented in [Private Beta Privacy Operations](./private-beta-privacy-operations.md).
+
+The public Privacy page does not expose D1 database UUIDs. It states that production and preview D1 databases currently report an APAC operating region, with this caution: The APAC operating region is not presented as a legally guaranteed data-residency commitment.
+
 ## Current Operational Boundaries
 
-- Browser form submission remains disabled and disconnected.
+- Browser form submission remains disabled by default and is connected only for focused test-mode builds or a future enabled build.
 - Public intake remains disabled.
 - Worker tests use a locally simulated D1 binding and mocked Turnstile Siteverify responses.
 - Remote migrations are not applied by validation or quality scripts.
 - No email notification is implemented.
-- Server-side Turnstile validation is implemented for the Worker API, but the browser widget is not connected yet.
+- Server-side Turnstile validation is implemented for the Worker API, and the browser widget is wired only for test-mode and future enabled builds.
 - The production Turnstile secret is not stored in this repository.
 - No deployment occurs from this repository task.
 

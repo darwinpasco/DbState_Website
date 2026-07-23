@@ -58,6 +58,8 @@ The Worker requires:
 
 Tokens are not cached, persisted, logged, or returned in API responses.
 
+The public Privacy page discloses that Cloudflare may process browser and connection signals needed for bot detection and links to the Cloudflare Turnstile Privacy Addendum. DbState does not claim that Turnstile collects no personal information or that Turnstile processing is limited to a specific country.
+
 ## Disabled Public Intake
 
 Production configuration remains:
@@ -168,4 +170,4 @@ Before public intake can be enabled, later reviewed slices must:
 - run upload and deployment validation
 - decide the operational rollout path
 - add email notification if approved
-- update public privacy documentation if application intake starts collecting submitted answers
+- verify public privacy documentation and applicant privacy operations for the enabled workflow

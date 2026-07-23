@@ -134,6 +134,20 @@ apply remote migrations as part of routine website checks.
 See `docs/private-beta-d1-operations.md` for the current D1 operational
 boundary.
 
+## Applicant Privacy Operations
+
+The public Privacy page is available at `/privacy/`. It describes website and
+Private Beta application information handling, Cloudflare processing,
+Turnstile verification, consent, correction and deletion requests, and the
+365-day application-record retention date.
+
+Applicant privacy operations are documented in
+`docs/private-beta-privacy-operations.md`.
+
+The D1 schema records `retention_until` metadata, but automated retention
+enforcement is deferred while public application intake remains closed. Privacy
+questions and requests may be sent to `darwin@dbstate.com`.
+
 ## Turnstile Operations
 
 The provisioned Cloudflare Turnstile widget is `DbState Private Beta` in
@@ -366,6 +380,8 @@ The production Turnstile secret remains uninstalled. Email notification from
 - The Private Beta application API is present but production intake is disabled.
 - Remote D1 production and preview IDs are configured, but migrations are not
   applied by this task.
+- The public Privacy page and applicant privacy runbook are present, but
+  automated retention enforcement is not implemented.
 - Server-side Turnstile validation is implemented for the Worker API, and the
   browser widget is wired for test-mode and future enabled builds. Production
   secret installation is deferred.
