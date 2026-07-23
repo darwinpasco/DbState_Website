@@ -205,7 +205,7 @@ export const postgresqlCoverageGroups = [
 ];
 
 export const postgresqlCoverageLimitations =
-  "Current Private Beta scope does not yet include procedures, aggregates, window functions, default privileges, database-level privileges, column-level privileges, ownership changes, or role membership grants.";
+  "Current Private Beta scope does not yet include procedures, aggregates, window functions, default privileges, database-level grants, column-level privileges, ownership changes, or role membership grants.";
 
 export const productBoundaries = [
   {

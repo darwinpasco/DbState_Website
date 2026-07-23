@@ -49,6 +49,7 @@ The local development server defaults to `http://localhost:4321`.
 npm run format:check
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 Or run the combined validation script:
@@ -56,6 +57,52 @@ Or run the combined validation script:
 ```sh
 npm run validate
 ```
+
+Run the full quality gate:
+
+```sh
+npm run quality
+```
+
+`npm run quality` runs formatting verification, Astro and TypeScript checks,
+the production build, and the Playwright browser test suite.
+
+## Browser Quality Gate
+
+The repository includes Playwright tests for site-wide browser validation.
+The tests run against Astro static preview at `http://127.0.0.1:4321`, not
+Wrangler tunnel mode, Cloudflare OAuth, or a live deployment.
+
+Install the Chromium browser used by Playwright:
+
+```sh
+npm run test:e2e:install
+```
+
+Run the headless browser suite:
+
+```sh
+npm run test:e2e
+```
+
+Run the same suite in headed mode for local debugging:
+
+```sh
+npm run test:e2e:headed
+```
+
+The quality gate checks static routes, internal links, metadata, responsive
+overflow, documentation navigation, disabled Private Beta intake behavior,
+product screenshot semantics, and current product boundary statements.
+
+These are structural accessibility checks for headings, labels, navigation,
+keyboard focus movement, alternative text, `aria-current`, and disabled intake
+status. They do not prove full accessibility compliance and do not replace
+manual accessibility or visual review.
+
+GitHub Actions runs the same quality gate on pull requests targeting `dev` and
+pushes to `dev`. The workflow also runs Wrangler dry-run validation without
+deploying, using secrets, or requiring Cloudflare credentials.
 
 ## Formatting
 
@@ -119,6 +166,12 @@ Local Cloudflare-compatible preview:
 npm run preview
 ```
 
+Local Astro static preview used by automated tests:
+
+```sh
+npm run preview:astro
+```
+
 Deployment commands:
 
 ```sh
@@ -139,9 +192,25 @@ Do not use `https://example.com` as the real production value. Replace it with t
 
 The default robots metadata is currently `noindex, nofollow`, appropriate for a development-stage public website foundation. Revisit this before public launch.
 
+## Manual Visual Review Checklist
+
+Automated tests are a quality gate, not the full review process. Before merging
+substantial website changes, manually inspect:
+
+- 390px, 768px, 1024px, and 1440px viewports
+- Header and footer navigation
+- Homepage hierarchy and first-scroll story
+- Product workflow models
+- Safety boundaries
+- Private Beta disabled intake state
+- Documentation sidebar and article navigation
+- Product screenshots and full-size screenshot links
+- Keyboard focus states
+- Color contrast and text readability
+- Direct refresh of nested routes
+- Static 404 page
+
 ## Deferred Work
 
 - Private Beta form submission is not implemented in this task.
-- Documentation architecture and content collections are not implemented yet.
-- Real product screenshots are not included yet.
 - Analytics, cookies, authentication, and backend services are intentionally out of scope.
