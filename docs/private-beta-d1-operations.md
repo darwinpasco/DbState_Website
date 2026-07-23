@@ -28,6 +28,8 @@ PRIVATE_BETA_INTAKE_MODE=disabled
 
 While disabled, `POST /api/private-beta-applications` returns `503 intake_disabled` before request validation or persistence.
 
+When intake is in Worker test mode or a future enabled mode, D1 persistence occurs only after application-field validation and server-side Turnstile Siteverify validation succeed.
+
 ## Static Asset Routing
 
 The site remains asset-first. Only this path runs Worker code first:
@@ -57,6 +59,7 @@ The validation checks:
 - Worker-first routing limited to `/api/private-beta-applications`
 - no `remote: true`
 - no generated snake-case bindings
+- non-secret Turnstile settings for the public sitekey, expected action, and expected hostnames
 
 ## Migration Scripts
 
@@ -100,23 +103,25 @@ In managed local environments where Wrangler cannot write logs under the user pr
 
 - Browser form submission remains disabled and disconnected.
 - Public intake remains disabled.
-- Worker tests use a locally simulated D1 binding.
+- Worker tests use a locally simulated D1 binding and mocked Turnstile Siteverify responses.
 - Remote migrations are not applied by validation or quality scripts.
 - No email notification is implemented.
-- No Turnstile validation is implemented.
+- Server-side Turnstile validation is implemented for the Worker API, but the browser widget is not connected yet.
+- The production Turnstile secret is not stored in this repository.
 - No deployment occurs from this repository task.
 
-## Preview migration evidence
+## Production migration evidence
 
 Verified on 2026-07-23:
 
-- Preview database ID: `5b3e215c-0ecb-40eb-a4c4-794f913c9cee`
-- `0001_private_beta_applications.sql` applied successfully
-- No preview migrations remain pending
+- Production database ID: `97cd3f79-cc4a-4b05-a397-05d6057ab38e`
+- `0001_private_beta_applications.sql` is recorded as applied
+- No production migrations remain pending
 - `private_beta_applications` exists
 - `private_beta_application_status_history` exists
 - Required indexes exist
+- Duplicate protection uses a unique index on `normalized_email, submission_bucket`
 - Application count is `0`
 - Status-history count is `0`
-- Production migration remains unapplied
+- No production application was inserted
 - Public intake remains disabled

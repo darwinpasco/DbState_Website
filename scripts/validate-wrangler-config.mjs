@@ -80,6 +80,38 @@ if (config.vars?.PRIVATE_BETA_INTAKE_MODE !== "disabled") {
   fail("PRIVATE_BETA_INTAKE_MODE must remain disabled.");
 }
 
+if (config.vars?.TURNSTILE_SITE_KEY !== "0x4AAAAAAD7ybcKG7AdVbfGm") {
+  fail("TURNSTILE_SITE_KEY must match the provisioned public sitekey.");
+}
+
+if (config.vars?.TURNSTILE_EXPECTED_ACTION !== "private-beta-application") {
+  fail("TURNSTILE_EXPECTED_ACTION must remain private-beta-application.");
+}
+
+const expectedHostnames = "dbstate.com,www.dbstate.com";
+if (config.vars?.TURNSTILE_EXPECTED_HOSTNAMES !== expectedHostnames) {
+  fail("TURNSTILE_EXPECTED_HOSTNAMES must be dbstate.com,www.dbstate.com.");
+}
+
+if ("TURNSTILE_SECRET_KEY" in (config.vars ?? {})) {
+  fail("TURNSTILE_SECRET_KEY must not be stored in wrangler.jsonc vars.");
+}
+
+if ("secrets" in config && JSON.stringify(config.secrets).includes("0x")) {
+  fail("wrangler.jsonc secrets configuration must not include secret values.");
+}
+
+const configTextWithoutSitekey = configText.replace(
+  "0x4AAAAAAD7ybcKG7AdVbfGm",
+  "",
+);
+
+if (/1x0+|2x0+|3x0+/.test(configTextWithoutSitekey)) {
+  fail(
+    "Production Wrangler configuration must not contain Turnstile test keys.",
+  );
+}
+
 if (config.assets?.directory !== "./dist") {
   fail("assets.directory must remain ./dist.");
 }

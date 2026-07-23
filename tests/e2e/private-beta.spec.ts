@@ -65,4 +65,6 @@ test("private beta questionnaire remains disabled and non-submitting", async ({
   expect(pageSource).not.toContain("localStorage");
   expect(pageSource).not.toContain("document.cookie");
   expect(pageSource).not.toMatch(/onsubmit=/i);
+  expect(pageSource).not.toContain("challenges.cloudflare.com/turnstile");
+  expect(pageSource).not.toContain("cf-turnstile");
 });

@@ -95,6 +95,10 @@ The public Private Beta form remains disabled and disconnected. Worker tests
 exercise the backend contract in `PRIVATE_BETA_INTAKE_MODE=test`; production
 configuration remains `PRIVATE_BETA_INTAKE_MODE=disabled`.
 
+The Worker API also includes server-side Cloudflare Turnstile validation for
+future application submissions. Tests inject deterministic Siteverify responses;
+the browser form does not load the Turnstile widget yet.
+
 ## D1 Operations
 
 The Private Beta application API uses one configured D1 binding:
@@ -128,6 +132,28 @@ apply remote migrations as part of routine website checks.
 
 See `docs/private-beta-d1-operations.md` for the current D1 operational
 boundary.
+
+## Turnstile Operations
+
+The provisioned Cloudflare Turnstile widget is `DbState Private Beta` in
+Managed mode. The public sitekey and non-secret policy settings are configured
+in `wrangler.jsonc`:
+
+```text
+TURNSTILE_SITE_KEY=0x4AAAAAAD7ybcKG7AdVbfGm
+TURNSTILE_EXPECTED_ACTION=private-beta-application
+TURNSTILE_EXPECTED_HOSTNAMES=dbstate.com,www.dbstate.com
+```
+
+The production secret must be installed only as a Worker secret named
+`TURNSTILE_SECRET_KEY`. Do not commit, print, log, or document the secret value.
+
+Server-side validation calls Cloudflare Siteverify before D1 persistence when
+intake is in Worker test mode or a future enabled mode. The current public form
+remains disabled, disconnected, and does not load the Turnstile browser widget.
+
+See `docs/private-beta-turnstile-operations.md` for the operational boundary and
+future secret-installation notes.
 
 ## Browser Quality Gate
 
@@ -283,5 +309,7 @@ substantial website changes, manually inspect:
 - The Private Beta application API is present but production intake is disabled.
 - Remote D1 production and preview IDs are configured, but migrations are not
   applied by this task.
+- Server-side Turnstile validation is implemented for the Worker API, but the
+  browser widget and production secret installation are deferred.
 - Email notifications to `darwin@dbstate.com` from `private-beta@dbstate.com` are documented for later slices only and are not implemented.
 - Analytics, cookies, authentication, and backend services are intentionally out of scope.

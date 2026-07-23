@@ -6,14 +6,44 @@ import worker from "../../worker/index";
 import {
   CONSENT_VERSION,
   SUCCESS_RESPONSE_STATUS,
+  TURNSTILE_EXPECTED_ACTION,
 } from "../../worker/private-beta/application-contract";
 import type { WorkerEnv } from "../../worker/private-beta/application-handler";
 import type {
   D1DatabaseLike,
   D1PreparedStatementLike,
 } from "../../worker/private-beta/application-repository";
+import type { SiteverifyFetch } from "../../worker/private-beta/turnstile-validation";
 
 const endpoint = "https://dbstate.com/api/private-beta-applications";
+const fakeTurnstileToken = "fake-turnstile-token";
+const fakeTurnstileSecret = "fake-turnstile-secret";
+
+function siteverifySuccessBody(overrides: Record<string, unknown> = {}) {
+  return {
+    success: true,
+    action: TURNSTILE_EXPECTED_ACTION,
+    hostname: "dbstate.com",
+    ...overrides,
+  };
+}
+
+function createSiteverifyFetch(
+  body: unknown = siteverifySuccessBody(),
+  init: ResponseInit = {},
+) {
+  const siteverifyFetch: SiteverifyFetch = async () => {
+    return new Response(JSON.stringify(body), {
+      status: init.status ?? 200,
+      headers: {
+        "content-type": "application/json",
+        ...init.headers,
+      },
+    });
+  };
+
+  return vi.fn(siteverifyFetch);
+}
 
 function validApplication(overrides: Record<string, unknown> = {}) {
   return {
@@ -41,6 +71,7 @@ function validApplication(overrides: Record<string, unknown> = {}) {
     evaluationGoals:
       "Evaluate whether repository desired state makes review clearer.",
     processingConsent: true,
+    turnstileToken: fakeTurnstileToken,
     ...overrides,
   };
 }
@@ -62,6 +93,11 @@ function createEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
     ASSETS: createAssetsBinding(),
     PRIVATE_BETA_DB: env.PRIVATE_BETA_DB,
     PRIVATE_BETA_INTAKE_MODE: "test",
+    TURNSTILE_EXPECTED_ACTION,
+    TURNSTILE_EXPECTED_HOSTNAMES: "dbstate.com,www.dbstate.com",
+    TURNSTILE_SECRET_KEY: fakeTurnstileSecret,
+    TURNSTILE_SITE_KEY: "not-used-by-server-validation",
+    TURNSTILE_SITEVERIFY_FETCH: createSiteverifyFetch(),
     ...overrides,
   };
 }
@@ -143,9 +179,13 @@ describe("private beta application routing", () => {
 
 describe("private beta disabled mode", () => {
   test("POST returns 503 without validation or D1 writes", async () => {
+    const siteverifyFetch = createSiteverifyFetch();
     const response = await fetchWorker(
       jsonRequest({ unexpected: "field" }),
-      createEnv({ PRIVATE_BETA_INTAKE_MODE: "disabled" }),
+      createEnv({
+        PRIVATE_BETA_INTAKE_MODE: "disabled",
+        TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch,
+      }),
     );
     const body = await readJson(response);
 
@@ -156,6 +196,7 @@ describe("private beta disabled mode", () => {
         message: "Private Beta application intake is not currently enabled.",
       },
     });
+    expect(siteverifyFetch).not.toHaveBeenCalled();
     expect(await applicationCount()).toBe(0);
     expect(await historyCount()).toBe(0);
   });
@@ -245,6 +286,83 @@ describe("private beta request format controls", () => {
   });
 });
 
+describe("private beta Turnstile configuration", () => {
+  test("missing secret returns turnstile_not_configured without D1 writes", async () => {
+    const siteverifyFetch = createSiteverifyFetch();
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        TURNSTILE_SECRET_KEY: undefined,
+        TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch,
+      }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(503);
+    expect(body).toEqual({
+      error: {
+        code: "turnstile_not_configured",
+        message: "Application verification is not currently configured.",
+      },
+    });
+    expect(siteverifyFetch).not.toHaveBeenCalled();
+    expect(await applicationCount()).toBe(0);
+    expect(await historyCount()).toBe(0);
+  });
+
+  test("missing expected action returns controlled configuration error", async () => {
+    const siteverifyFetch = createSiteverifyFetch();
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        TURNSTILE_EXPECTED_ACTION: undefined,
+        TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch,
+      }),
+    );
+
+    expect(response.status).toBe(503);
+    expect(await readJson(response)).toMatchObject({
+      error: {
+        code: "turnstile_not_configured",
+      },
+    });
+    expect(siteverifyFetch).not.toHaveBeenCalled();
+    expect(await applicationCount()).toBe(0);
+  });
+
+  test("missing expected hostname list returns controlled configuration error", async () => {
+    const siteverifyFetch = createSiteverifyFetch();
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        TURNSTILE_EXPECTED_HOSTNAMES: undefined,
+        TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch,
+      }),
+    );
+
+    expect(response.status).toBe(503);
+    expect(await readJson(response)).toMatchObject({
+      error: {
+        code: "turnstile_not_configured",
+      },
+    });
+    expect(siteverifyFetch).not.toHaveBeenCalled();
+    expect(await applicationCount()).toBe(0);
+  });
+
+  test("public sitekey is not required by the server validation path", async () => {
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        TURNSTILE_SITE_KEY: undefined,
+      }),
+    );
+
+    expect(response.status).toBe(201);
+    expect(await applicationCount()).toBe(1);
+  });
+});
+
 describe("private beta validation", () => {
   test("missing required fields return field-specific errors", async () => {
     const response = await fetchWorker(jsonRequest({}));
@@ -322,10 +440,66 @@ describe("private beta validation", () => {
       "Do not include credentials or sensitive content.",
     );
   });
+
+  test("missing Turnstile token returns turnstile_required without field diagnostics", async () => {
+    const siteverifyFetch = createSiteverifyFetch();
+    const { turnstileToken: _turnstileToken, ...application } =
+      validApplication();
+
+    const response = await fetchWorker(
+      jsonRequest(application),
+      createEnv({ TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(422);
+    expect(body).toEqual({
+      error: {
+        code: "turnstile_required",
+        message: "Complete the verification before submitting the application.",
+      },
+    });
+    expect(siteverifyFetch).not.toHaveBeenCalled();
+    expect(await applicationCount()).toBe(0);
+  });
+
+  test("invalid Turnstile token values are rejected without echoing the token", async () => {
+    for (const turnstileToken of [123, "   ", "x".repeat(2049)]) {
+      const siteverifyFetch = createSiteverifyFetch();
+      const response = await fetchWorker(
+        jsonRequest(validApplication({ turnstileToken })),
+        createEnv({ TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch }),
+      );
+      const responseText = await response.text();
+
+      expect(response.status).toBe(422);
+      expect(responseText).not.toContain(String(turnstileToken));
+      expect(responseText).not.toContain("fields");
+      expect(siteverifyFetch).not.toHaveBeenCalled();
+      expect(await applicationCount()).toBe(0);
+    }
+  });
+
+  test("unexpected fields remain rejected and token content is not echoed", async () => {
+    const response = await fetchWorker(
+      jsonRequest(
+        validApplication({
+          arbitraryMetadata: "not accepted",
+          turnstileToken: "sensitive-token-value",
+        }),
+      ),
+    );
+    const responseText = await response.text();
+
+    expect(response.status).toBe(422);
+    expect(responseText).toContain("arbitraryMetadata");
+    expect(responseText).not.toContain("sensitive-token-value");
+  });
 });
 
 describe("private beta persistence", () => {
   test("valid requests return public fields and persist application plus history", async () => {
+    const siteverifyFetch = createSiteverifyFetch();
     const response = await fetchWorker(
       jsonRequest(
         validApplication({
@@ -334,10 +508,28 @@ describe("private beta persistence", () => {
           futureUpdatesOptIn: undefined,
         }),
       ),
+      createEnv({ TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch }),
     );
     const body = await readJson(response);
 
     expect(response.status).toBe(201);
+    expect(siteverifyFetch).toHaveBeenCalledOnce();
+    const firstCall = siteverifyFetch.mock.calls[0]!;
+    const siteverifyRequest = firstCall[0] as Request;
+    expect(siteverifyRequest).toBeInstanceOf(Request);
+    expect(siteverifyRequest.url).toBe(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    );
+    const siteverifyPayload = (await siteverifyRequest.json()) as Record<
+      string,
+      unknown
+    >;
+    expect(siteverifyPayload).toEqual({
+      secret: fakeTurnstileSecret,
+      response: fakeTurnstileToken,
+      idempotency_key: expect.any(String),
+    });
+    expect(siteverifyPayload).not.toHaveProperty("remoteip");
     expect(Object.keys(body).sort()).toEqual([
       "applicationReference",
       "status",
@@ -365,6 +557,8 @@ describe("private beta persistence", () => {
     expect(history?.status).toBe("new");
     expect(history?.changed_by).toBe("system");
     expect(history?.note).toBe("Application received");
+    expect(JSON.stringify(application)).not.toContain(fakeTurnstileToken);
+    expect(JSON.stringify(history)).not.toContain(fakeTurnstileToken);
 
     const submittedAt = Date.parse(String(application?.submitted_at));
     const retentionUntil = Date.parse(String(application?.retention_until));
@@ -386,6 +580,118 @@ describe("private beta persistence", () => {
     ).first<{ future_updates_opt_in: number }>();
 
     expect(application?.future_updates_opt_in).toBe(1);
+  });
+});
+
+describe("private beta Turnstile rejection behavior", () => {
+  test.each([
+    ["unsuccessful token", { success: false }, 422, "turnstile_invalid"],
+    [
+      "expired or duplicate token",
+      { success: false, "error-codes": ["timeout-or-duplicate"] },
+      422,
+      "turnstile_invalid",
+    ],
+    ["malformed response", { success: "yes" }, 422, "turnstile_invalid"],
+    [
+      "action mismatch",
+      siteverifySuccessBody({ action: "other-action" }),
+      422,
+      "turnstile_action_mismatch",
+    ],
+    [
+      "missing action",
+      { success: true, hostname: "dbstate.com" },
+      422,
+      "turnstile_action_mismatch",
+    ],
+    [
+      "hostname mismatch",
+      siteverifySuccessBody({ hostname: "example.invalid" }),
+      422,
+      "turnstile_hostname_mismatch",
+    ],
+    [
+      "missing hostname",
+      { success: true, action: TURNSTILE_EXPECTED_ACTION },
+      422,
+      "turnstile_hostname_mismatch",
+    ],
+    [
+      "non-2xx response",
+      siteverifySuccessBody(),
+      503,
+      "turnstile_unavailable",
+      502,
+    ],
+  ])(
+    "%s rejects without persisting",
+    async (_caseName, siteverifyBody, status, code, siteverifyStatus = 200) => {
+      const response = await fetchWorker(
+        jsonRequest(validApplication()),
+        createEnv({
+          TURNSTILE_SITEVERIFY_FETCH: createSiteverifyFetch(siteverifyBody, {
+            status: siteverifyStatus,
+          }),
+        }),
+      );
+      const body = await readJson(response);
+
+      expect(response.status).toBe(status);
+      expect(body).toMatchObject({
+        error: {
+          code,
+        },
+      });
+      expect(JSON.stringify(body)).not.toContain(fakeTurnstileToken);
+      expect(await applicationCount()).toBe(0);
+      expect(await historyCount()).toBe(0);
+    },
+  );
+
+  test("network error rejects without persisting", async () => {
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        TURNSTILE_SITEVERIFY_FETCH: vi.fn(async () => {
+          throw new Error("network failure with secret data");
+        }),
+      }),
+    );
+    const responseText = await response.text();
+
+    expect(response.status).toBe(503);
+    expect(responseText).toContain("turnstile_unavailable");
+    expect(responseText).not.toContain("network failure");
+    expect(responseText).not.toContain(fakeTurnstileToken);
+    expect(await applicationCount()).toBe(0);
+    expect(await historyCount()).toBe(0);
+  });
+
+  test("request timeout rejects without persisting", async () => {
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        TURNSTILE_SITEVERIFY_TIMEOUT_MS: "1",
+        TURNSTILE_SITEVERIFY_FETCH: vi.fn(
+          (_request: RequestInfo | URL, init?: RequestInit) =>
+            new Promise<Response>((_resolve, reject) => {
+              init?.signal?.addEventListener("abort", () => {
+                reject(new DOMException("Aborted", "AbortError"));
+              });
+            }),
+        ),
+      }),
+    );
+
+    expect(response.status).toBe(503);
+    expect(await readJson(response)).toMatchObject({
+      error: {
+        code: "turnstile_unavailable",
+      },
+    });
+    expect(await applicationCount()).toBe(0);
+    expect(await historyCount()).toBe(0);
   });
 });
 
@@ -465,6 +771,42 @@ describe("private beta failure behavior", () => {
     expect(responseText).toContain("persistence_failed");
     expect(responseText).not.toContain("raw sqlite");
     expect(responseText).not.toContain("Sensitive Applicant Content");
+    expect(logSpy).not.toHaveBeenCalled();
+    expect(errorSpy).not.toHaveBeenCalled();
+
+    logSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
+  test("Turnstile validation does not log tokens, secrets, applicant content, or raw responses", async () => {
+    const logSpy = vi.spyOn(console, "log");
+    const errorSpy = vi.spyOn(console, "error");
+
+    const response = await fetchWorker(
+      jsonRequest(
+        validApplication({
+          difficultChange:
+            "A difficult schema review with private applicant details.",
+        }),
+      ),
+      createEnv({
+        TURNSTILE_SITEVERIFY_FETCH: createSiteverifyFetch(
+          {
+            success: false,
+            "error-codes": ["invalid-input-response"],
+            raw: "raw provider response",
+          },
+          { status: 200 },
+        ),
+      }),
+    );
+    const responseText = await response.text();
+
+    expect(response.status).toBe(422);
+    expect(responseText).not.toContain(fakeTurnstileToken);
+    expect(responseText).not.toContain(fakeTurnstileSecret);
+    expect(responseText).not.toContain("private applicant details");
+    expect(responseText).not.toContain("raw provider response");
     expect(logSpy).not.toHaveBeenCalled();
     expect(errorSpy).not.toHaveBeenCalled();
 
