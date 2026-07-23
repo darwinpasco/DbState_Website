@@ -1,8 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "dbstate-website",
+  "main": "./worker/index.ts",
   "compatibility_date": "2026-07-22",
+  "vars": {
+    "PRIVATE_BETA_INTAKE_MODE": "disabled",
+  },
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/private-beta-applications"],
   },
 }

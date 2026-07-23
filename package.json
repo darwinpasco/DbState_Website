@@ -15,7 +15,10 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:install": "playwright install chromium",
-    "quality": "npm run validate && npm run test:e2e",
+    "test:worker": "node ./scripts/worker-test-command.mjs run",
+    "test:worker:watch": "node ./scripts/worker-test-command.mjs",
+    "generate:worker-types": "wrangler types",
+    "quality": "npm run validate && npm run test:worker && npm run test:e2e",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
@@ -25,10 +28,12 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@cloudflare/vitest-pool-workers": "^0.18.7",
     "@playwright/test": "^1.61.1",
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.9.2",
+    "vitest": "^4.1.10",
     "wrangler": "^4.113.0"
   }
 }
