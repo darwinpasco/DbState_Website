@@ -110,6 +110,34 @@ export async function expectNoHorizontalOverflow(page: Page) {
     const pageOverflow =
       document.documentElement.scrollWidth -
       document.documentElement.clientWidth;
+    const overflowThreshold = 1;
+    const overflowingElements =
+      pageOverflow > overflowThreshold
+        ? Array.from(document.querySelectorAll("body *"))
+            .map((element) => {
+              const rect = element.getBoundingClientRect();
+              return {
+                tag: element.tagName.toLowerCase(),
+                id: element.id,
+                className: element.className.toString(),
+                text:
+                  element.textContent
+                    ?.replace(/\s+/g, " ")
+                    .trim()
+                    .slice(0, 80) ?? "",
+                left: Math.round(rect.left * 100) / 100,
+                right: Math.round(rect.right * 100) / 100,
+                width: Math.round(rect.width * 100) / 100,
+                viewportWidth,
+              };
+            })
+            .filter(
+              (item) =>
+                item.left < -overflowThreshold ||
+                item.right > viewportWidth + overflowThreshold,
+            )
+            .slice(0, 12)
+        : [];
     const fixedOrStickyOverflow = Array.from(document.querySelectorAll("*"))
       .map((element) => {
         const styles = window.getComputedStyle(element);
@@ -144,12 +172,20 @@ export async function expectNoHorizontalOverflow(page: Page) {
 
     return {
       pageOverflow,
+      overflowingElements,
       fixedOrStickyOverflow,
       wideFigures,
     };
   });
 
-  expect(result.pageOverflow).toBeLessThanOrEqual(1);
+  expect(
+    result.pageOverflow,
+    `Horizontal overflow offenders:\n${JSON.stringify(
+      result.overflowingElements,
+      null,
+      2,
+    )}`,
+  ).toBeLessThanOrEqual(1);
   expect(result.fixedOrStickyOverflow).toEqual([]);
   expect(result.wideFigures).toBe(0);
 }
