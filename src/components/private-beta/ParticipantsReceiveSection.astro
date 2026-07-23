@@ -1,0 +1,35 @@
+---
+import { participantReceives } from "../../data/privateBetaPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="participants-receive-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="participants-receive-heading"
+        eyebrow="Access package"
+        title="What Private Beta access includes."
+        description="Private Beta access gives participants enough product context to evaluate the current Windows build against a real local PostgreSQL workflow."
+      />
+    </div>
+
+    <article class="rounded-lg border border-border bg-surface p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-semibold text-text">Included with access</h3>
+        <StatusBadge label="private beta access" tone="safe" />
+      </div>
+      <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+        {
+          participantReceives.map((item) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text-muted">
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </div>
+</SectionContainer>

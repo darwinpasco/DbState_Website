@@ -1,0 +1,42 @@
+---
+import { participantAsks } from "../../data/privateBetaPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="participant-asks-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="participant-asks-heading"
+        eyebrow="Feedback expectations"
+        title="What we need from participants."
+        description="The most useful Private Beta feedback is grounded in real schema, reference-data, comparison, and release-review problems."
+      />
+      <aside class="mt-6 rounded-lg border border-border bg-bg-muted p-4">
+        <p class="text-sm leading-6 text-text-muted">
+          Private Beta participation is most useful when the evaluator can
+          describe a recent database change that was difficult to review,
+          reproduce, or release.
+        </p>
+      </aside>
+    </div>
+
+    <article class="rounded-lg border border-border bg-surface p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h3 class="font-semibold text-text">Feedback requested</h3>
+        <StatusBadge label="structured feedback" tone="review" />
+      </div>
+      <ul class="mt-4 grid gap-2">
+        {
+          participantAsks.map((item) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text-muted">
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </div>
+</SectionContainer>

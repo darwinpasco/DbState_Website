@@ -1,0 +1,37 @@
+---
+import { sensitiveInformationList } from "../../data/privateBetaPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="privacy-note-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="privacy-note-heading"
+        eyebrow="Safety and privacy"
+        title="Do not submit credentials or production secrets."
+        description="Private Beta qualification should describe the workflow and problem, not expose sensitive database content."
+      />
+      <div class="mt-6">
+        <StatusBadge label="workflow details only" tone="review" />
+      </div>
+    </div>
+
+    <article class="rounded-lg border border-border bg-surface p-4">
+      <h3 class="font-semibold text-text">
+        Future application intake should not include
+      </h3>
+      <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+        {
+          sensitiveInformationList.map((item) => (
+            <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text-muted">
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </article>
+  </div>
+</SectionContainer>

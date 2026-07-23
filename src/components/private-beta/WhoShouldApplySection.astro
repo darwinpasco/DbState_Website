@@ -1,0 +1,33 @@
+---
+import { suitableParticipantGroups } from "../../data/privateBetaPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+---
+
+<SectionContainer ariaLabelledby="who-should-apply-heading">
+  <div class="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div>
+      <SectionHeading
+        id="who-should-apply-heading"
+        eyebrow="Participant fit"
+        title="Private Beta is for teams with a real database-change problem."
+        description="DbState is currently best evaluated by teams that already feel the cost of scattered database state, difficult review, or unclear handoff between repository changes and PostgreSQL."
+      />
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+      {
+        suitableParticipantGroups.map((group) => (
+          <article class="rounded-lg border border-border bg-surface p-4">
+            <h3 class="font-mono text-sm font-semibold text-text">
+              {group.title}
+            </h3>
+            <p class="mt-3 text-sm leading-6 text-text-muted">
+              {group.description}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</SectionContainer>

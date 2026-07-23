@@ -1,0 +1,40 @@
+---
+import SectionContainer from "../layout/SectionContainer.astro";
+import CtaLink from "../ui/CtaLink.astro";
+---
+
+<SectionContainer
+  ariaLabelledby="product-safety-links-heading"
+  class="pb-20 md:pb-28"
+>
+  <div class="rounded-lg border border-border-strong bg-surface p-5 md:p-8">
+    <div class="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+      <div class="max-w-3xl">
+        <p
+          class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+        >
+          Before applying
+        </p>
+        <h2
+          id="product-safety-links-heading"
+          class="mt-3 text-2xl font-semibold text-text md:text-3xl"
+        >
+          Review the product boundaries before applying.
+        </h2>
+        <p class="mt-4 text-base leading-7 text-text-muted md:text-lg">
+          DbState is intended to improve visibility and review discipline while
+          leaving database execution and Git history under the team's control.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row lg:flex-col">
+        <CtaLink href="/product" label="Review Product workflows" />
+        <CtaLink
+          href="/safety"
+          label="Review the Safety Model"
+          variant="secondary"
+        />
+      </div>
+    </div>
+  </div>
+</SectionContainer>

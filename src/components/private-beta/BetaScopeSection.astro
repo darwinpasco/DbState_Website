@@ -1,0 +1,41 @@
+---
+import { betaScopeGroups } from "../../data/privateBetaPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="beta-scope-heading">
+  <SectionHeading
+    id="beta-scope-heading"
+    eyebrow="Current scope"
+    title="A focused local workflow."
+    description="Private Beta scope is intentionally narrow: PostgreSQL state, local Windows workflows, repository desired state, and review-only release handoff."
+  />
+
+  <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    {
+      betaScopeGroups.map((group) => (
+        <article class="rounded-lg border border-border bg-surface p-4">
+          <h3 class="font-mono text-sm font-semibold text-text">
+            {group.title}
+          </h3>
+          <ul class="mt-4 grid gap-2">
+            {group.items.map((item) => (
+              <li class="rounded-sm border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text-muted">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+
+  <div class="mt-5 rounded-lg border border-border-strong bg-bg-muted p-4">
+    <StatusBadge label="execution boundary" tone="review" />
+    <p class="mt-4 text-sm leading-6 text-text-muted">
+      Database execution remains outside DbState.
+    </p>
+  </div>
+</SectionContainer>
