@@ -51,6 +51,7 @@ The local development server defaults to `http://localhost:4321`.
 npm run format:check
 npm run check
 npm run build
+npm run validate:wrangler-config
 npm run test:worker
 npm run test:e2e
 ```
@@ -68,8 +69,8 @@ npm run quality
 ```
 
 `npm run quality` runs formatting verification, Astro and TypeScript checks,
-the production build, Worker-runtime tests, and the Playwright browser test
-suite.
+the production build, focused Wrangler configuration validation,
+Worker-runtime tests, and the Playwright browser test suite.
 
 ## Worker API Tests
 
@@ -93,6 +94,40 @@ directory so tests do not depend on a user-profile log path.
 The public Private Beta form remains disabled and disconnected. Worker tests
 exercise the backend contract in `PRIVATE_BETA_INTAKE_MODE=test`; production
 configuration remains `PRIVATE_BETA_INTAKE_MODE=disabled`.
+
+## D1 Operations
+
+The Private Beta application API uses one configured D1 binding:
+
+```text
+PRIVATE_BETA_DB
+```
+
+The production database is `dbstate-private-beta`; the preview database ID is
+also recorded in `wrangler.jsonc`. Validate the expected binding, disabled
+intake mode, and selective Worker-first routing with:
+
+```sh
+npm run validate:wrangler-config
+```
+
+Remote migration scripts target the configured `PRIVATE_BETA_DB` D1 binding.
+Remote preview operations use both `--remote --preview` and the configured
+`preview_database_id`; production operations use `--remote` and the configured
+`database_id`. They must be run only as explicit Cloudflare operations:
+
+```sh
+npm run d1:migrations:list:preview
+npm run d1:migrations:apply:preview
+npm run d1:migrations:list:production
+npm run d1:migrations:apply:production
+```
+
+These scripts are not part of normal validation or `npm run quality`. Do not
+apply remote migrations as part of routine website checks.
+
+See `docs/private-beta-d1-operations.md` for the current D1 operational
+boundary.
 
 ## Browser Quality Gate
 
@@ -209,7 +244,10 @@ npm run deploy
 
 Cloudflare branch builds may use `wrangler versions upload`. Production deployment uses `wrangler deploy`.
 
-The current Worker runtime exists only for the Private Beta application API foundation. Public application intake remains disabled until a later reviewed slice connects form submission and provisions the required Cloudflare resources.
+The current Worker runtime exists only for the Private Beta application API
+foundation. Public application intake remains disabled until a later reviewed
+slice connects form submission and completes the required Cloudflare operational
+steps.
 
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
@@ -243,6 +281,7 @@ substantial website changes, manually inspect:
 
 - Private Beta browser form submission is not implemented in this task.
 - The Private Beta application API is present but production intake is disabled.
-- No remote D1 database has been created or bound yet.
+- Remote D1 production and preview IDs are configured, but migrations are not
+  applied by this task.
 - Email notifications to `darwin@dbstate.com` from `private-beta@dbstate.com` are documented for later slices only and are not implemented.
 - Analytics, cookies, authentication, and backend services are intentionally out of scope.
