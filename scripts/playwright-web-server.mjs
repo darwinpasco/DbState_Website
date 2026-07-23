@@ -1,6 +1,11 @@
 import { spawn, spawnSync } from "node:child_process";
 
 const node = process.execPath;
+const portArgumentIndex = process.argv.indexOf("--port");
+const previewPort =
+  portArgumentIndex >= 0 && process.argv[portArgumentIndex + 1]
+    ? process.argv[portArgumentIndex + 1]
+    : "4321";
 const serverTtlMs = Number.parseInt(
   process.env.DBSTATE_PLAYWRIGHT_SERVER_TTL_MS ?? "45000",
   10,
@@ -37,7 +42,7 @@ const preview = spawn(
     "--host",
     "127.0.0.1",
     "--port",
-    "4321",
+    previewPort,
   ],
   {
     cwd: process.cwd(),

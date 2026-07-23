@@ -7,6 +7,7 @@ const isCi = Boolean(
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  testIgnore: ["private-beta-client.spec.ts"],
   fullyParallel: false,
   retries: isCi ? 1 : 0,
   workers: 1,

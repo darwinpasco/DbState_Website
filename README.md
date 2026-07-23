@@ -91,13 +91,14 @@ npm run test:worker:watch
 The Worker test wrapper keeps Wrangler logs inside the ignored `.wrangler/`
 directory so tests do not depend on a user-profile log path.
 
-The public Private Beta form remains disabled and disconnected. Worker tests
-exercise the backend contract in `PRIVATE_BETA_INTAKE_MODE=test`; production
+The public Private Beta form defaults to closed intake. Worker tests exercise
+the backend contract in `PRIVATE_BETA_INTAKE_MODE=test`; production
 configuration remains `PRIVATE_BETA_INTAKE_MODE=disabled`.
 
 The Worker API also includes server-side Cloudflare Turnstile validation for
-future application submissions. Tests inject deterministic Siteverify responses;
-the browser form does not load the Turnstile widget yet.
+future application submissions. Tests inject deterministic Siteverify responses.
+The browser form loads Turnstile only in focused client test builds or a future
+enabled public build.
 
 ## D1 Operations
 
@@ -149,8 +150,9 @@ The production secret must be installed only as a Worker secret named
 `TURNSTILE_SECRET_KEY`. Do not commit, print, log, or document the secret value.
 
 Server-side validation calls Cloudflare Siteverify before D1 persistence when
-intake is in Worker test mode or a future enabled mode. The current public form
-remains disabled, disconnected, and does not load the Turnstile browser widget.
+intake is in Worker test mode or a future enabled mode. The current public build
+remains disabled and does not load the Turnstile browser widget. Focused client
+tests use Cloudflare's always-pass public test sitekey and mocked API responses.
 
 See `docs/private-beta-turnstile-operations.md` for the operational boundary and
 future secret-installation notes.
@@ -179,6 +181,29 @@ Run the same suite in headed mode for local debugging:
 npm run test:e2e:headed
 ```
 
+Run the focused Private Beta client-form integration suite:
+
+```sh
+npm run test:e2e:private-beta-client
+```
+
+Run it in headed mode:
+
+```sh
+npm run test:e2e:private-beta-client:headed
+```
+
+The focused client suite serves an Astro build with:
+
+```text
+PUBLIC_PRIVATE_BETA_INTAKE_MODE=test
+PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+```
+
+That test mode renders Turnstile explicitly, exercises same-origin JSON
+submission through mocked browser API responses, and does not contact remote D1,
+install secrets, or enable production intake.
+
 The quality gate checks static routes, internal links, metadata, responsive
 overflow, documentation navigation, disabled Private Beta intake behavior,
 product screenshot semantics, and current product boundary statements.
@@ -189,8 +214,9 @@ status. They do not prove full accessibility compliance and do not replace
 manual accessibility or visual review.
 
 GitHub Actions runs the same quality gate on pull requests targeting `dev` and
-pushes to `dev`. The workflow also runs Wrangler dry-run validation without
-deploying, using secrets, or requiring Cloudflare credentials.
+pushes to `dev`, then runs the focused Private Beta client-form suite in test
+mode. The workflow also runs Wrangler dry-run validation without deploying,
+using secrets, or requiring Cloudflare credentials.
 
 ## Formatting
 
@@ -270,10 +296,10 @@ npm run deploy
 
 Cloudflare branch builds may use `wrangler versions upload`. Production deployment uses `wrangler deploy`.
 
-The current Worker runtime exists only for the Private Beta application API
-foundation. Public application intake remains disabled until a later reviewed
-slice connects form submission and completes the required Cloudflare operational
-steps.
+The current Worker runtime exists only for the Private Beta application API.
+Public application intake remains disabled until a later reviewed slice changes
+both the Worker intake mode and public build mode, installs the production
+Turnstile secret, and completes the required Cloudflare operational steps.
 
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
@@ -303,13 +329,45 @@ substantial website changes, manually inspect:
 - Direct refresh of nested routes
 - Static 404 page
 
+## Private Beta Intake Modes
+
+The browser page and Worker use separate controls.
+
+Worker runtime mode is configured through `PRIVATE_BETA_INTAKE_MODE` in
+`wrangler.jsonc`; the committed production value remains:
+
+```text
+PRIVATE_BETA_INTAKE_MODE=disabled
+```
+
+Public page behavior is selected at build time with
+`PUBLIC_PRIVATE_BETA_INTAKE_MODE`:
+
+- `disabled`: default. The questionnaire can be reviewed, the submit button is
+  disabled, no Turnstile script loads, no API handler is installed, and no
+  applicant information is transmitted to DbState.
+- `test`: used only by focused browser tests. The page uses Cloudflare's
+  always-pass public Turnstile test sitekey and mocked API responses.
+- `enabled`: reserved for a later reviewed activation slice. It requires
+  `PUBLIC_TURNSTILE_SITE_KEY`, renders Turnstile explicitly, and submits JSON to
+  the same-origin API after verification.
+
+The client stores Turnstile tokens only in memory, sends them only in the JSON
+API request, resets verification after recoverable failures, and does not use
+local storage, session storage, cookies, URL persistence, analytics, or draft
+persistence.
+
+The production Turnstile secret remains uninstalled. Email notification from
+`private-beta@dbstate.com` to `darwin@dbstate.com` is still deferred.
+
 ## Deferred Work
 
-- Private Beta browser form submission is not implemented in this task.
+- Production Private Beta browser form submission is not enabled.
 - The Private Beta application API is present but production intake is disabled.
 - Remote D1 production and preview IDs are configured, but migrations are not
   applied by this task.
-- Server-side Turnstile validation is implemented for the Worker API, but the
-  browser widget and production secret installation are deferred.
+- Server-side Turnstile validation is implemented for the Worker API, and the
+  browser widget is wired for test-mode and future enabled builds. Production
+  secret installation is deferred.
 - Email notifications to `darwin@dbstate.com` from `private-beta@dbstate.com` are documented for later slices only and are not implemented.
 - Analytics, cookies, authentication, and backend services are intentionally out of scope.

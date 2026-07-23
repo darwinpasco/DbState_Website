@@ -7,13 +7,64 @@ import SectionContainer from "../layout/SectionContainer.astro";
 import SectionHeading from "../layout/SectionHeading.astro";
 import StatusBadge from "../ui/StatusBadge.astro";
 
+const requestedMode = import.meta.env.PUBLIC_PRIVATE_BETA_INTAKE_MODE;
+const productionSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const testSiteKey = "1x00000000000000000000AA";
+const turnstileAction = "private-beta-application";
+const validModes = new Set(["disabled", "test", "enabled"]);
+const normalizedRequestedMode =
+  typeof requestedMode === "string" && validModes.has(requestedMode)
+    ? requestedMode
+    : "disabled";
+const isTestMode = normalizedRequestedMode === "test";
+const isEnabledMode =
+  normalizedRequestedMode === "enabled" &&
+  typeof productionSiteKey === "string" &&
+  productionSiteKey.length > 0 &&
+  !/^[123]x0+/.test(productionSiteKey);
+const publicMode = isTestMode ? "test" : isEnabledMode ? "enabled" : "disabled";
+const isInteractive = publicMode === "test" || publicMode === "enabled";
+const siteKey = publicMode === "test" ? testSiteKey : productionSiteKey;
+
 const workflowOptions = [
-  "Schema Compare: Database to Repository",
-  "Schema Compare: Repository to Database",
-  "Reference Data Compare: Database to Repository",
-  "Reference Data Compare: Repository to Database",
-  "Not sure yet",
+  {
+    label: "Schema Compare: Database to Repository",
+    value: "schema-database-to-repository",
+  },
+  {
+    label: "Schema Compare: Repository to Database",
+    value: "schema-repository-to-database",
+  },
+  {
+    label: "Reference Data Compare: Database to Repository",
+    value: "reference-data-database-to-repository",
+  },
+  {
+    label: "Reference Data Compare: Repository to Database",
+    value: "reference-data-repository-to-database",
+  },
 ];
+
+const referenceDataGitOptions = [
+  { label: "Yes", value: "yes" },
+  { label: "No", value: "no" },
+  { label: "Partially", value: "partially" },
+];
+
+const formDescription = isInteractive
+  ? "Complete the questionnaire, confirm processing consent, and complete verification before submitting. Submission does not guarantee Private Beta access."
+  : "The questionnaire can be reviewed, but submission is not currently available. Nothing entered is transmitted to DbState while application intake is closed.";
+const statusLabel = isInteractive ? "intake test mode" : "intake closed";
+const submitLabel = isInteractive
+  ? "Submit Private Beta application"
+  : "Application intake is currently closed";
+const statusNote = isInteractive
+  ? "Complete the required fields, consent checkbox, and verification before submitting. Submission does not guarantee acceptance."
+  : "No information entered on this page is transmitted to or stored by DbState while application intake is closed.";
+
+function errorId(id: string) {
+  return `${id}-error`;
+}
 ---
 
 <SectionContainer id="application" ariaLabelledby="application-heading">
@@ -21,14 +72,49 @@ const workflowOptions = [
     id="application-heading"
     eyebrow="Application questionnaire"
     title="Private Beta application questions."
-    description="The questionnaire is a preview of the information that will be requested when intake submission is connected. It is shown as a real form so labels, grouping, and required fields can be reviewed before submission handling is added."
+    description={formDescription}
   />
 
   <form
     class="mt-8 grid min-w-0 max-w-full gap-5 [min-inline-size:0]"
-    aria-describedby="application-disabled-note"
+    aria-describedby="application-intake-note"
     autocomplete="off"
+    novalidate
+    data-private-beta-application-form
+    data-private-beta-intake-mode={publicMode}
+    data-intake-mode={publicMode}
+    data-turnstile-site-key={isInteractive ? siteKey : undefined}
+    data-turnstile-action={turnstileAction}
   >
+    <div
+      data-error-summary
+      role="alert"
+      tabindex="-1"
+      hidden
+      class="rounded-lg border border-danger/60 bg-danger/10 p-4 text-sm leading-6 text-text"
+    >
+      <p class="font-semibold text-danger" data-error-summary-title>
+        Check the application form.
+      </p>
+      <ul class="mt-3 grid gap-1 text-text-muted" data-error-summary-list></ul>
+    </div>
+
+    <div
+      data-success-panel
+      tabindex="-1"
+      hidden
+      class="rounded-lg border border-safe/60 bg-safe-soft p-4 text-sm leading-6 text-text"
+    >
+      <h2 class="text-base font-semibold text-safe">Application received.</h2>
+      <p class="mt-2 text-text-muted">
+        We will review the technical fit and contact you using the email address
+        provided. Submission does not guarantee Private Beta access.
+      </p>
+      <p class="mt-3 font-mono text-sm text-text">
+        Reference: <span data-application-reference></span>
+      </p>
+    </div>
+
     {
       questionnaireGroups.map((group) => (
         <fieldset class="min-w-0 max-w-full rounded-lg border border-border bg-surface p-4 [min-inline-size:0]">
@@ -51,10 +137,20 @@ const workflowOptions = [
                 </label>
                 <input
                   id={field.id}
+                  name={field.name}
                   type={field.type}
                   required={field.required}
+                  minlength={field.minLength}
+                  maxlength={field.maxLength}
                   autocomplete={field.autocomplete ?? "off"}
+                  aria-describedby={errorId(field.id)}
                   class="min-h-11 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
+                />
+                <p
+                  id={errorId(field.id)}
+                  data-field-error-for={field.name}
+                  hidden
+                  class="text-sm leading-5 text-danger"
                 />
               </div>
             ))}
@@ -88,9 +184,19 @@ const workflowOptions = [
               </label>
               <textarea
                 id={field.id}
+                name={field.name}
                 required={field.required}
+                minlength={field.minLength}
+                maxlength={field.maxLength}
                 rows="4"
+                aria-describedby={errorId(field.id)}
                 class="min-h-28 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
+              />
+              <p
+                id={errorId(field.id)}
+                data-field-error-for={field.name}
+                hidden
+                class="text-sm leading-5 text-danger"
               />
             </div>
           ))
@@ -116,22 +222,58 @@ const workflowOptions = [
                   class="text-sm font-semibold text-text [overflow-wrap:anywhere]"
                 >
                   {field.label}
-                  {field.required && (
-                    <span class="ml-1 font-mono text-xs text-review">
-                      required
-                    </span>
-                  )}
+                  <span class="ml-1 font-mono text-xs text-review">
+                    required
+                  </span>
                 </label>
                 <select
                   id={field.id}
-                  required={field.required}
+                  name={field.name}
+                  required
+                  aria-describedby={errorId(field.id)}
                   class="min-h-11 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
                 >
                   <option value="">Select a workflow</option>
                   {workflowOptions.map((option) => (
-                    <option value={option}>{option}</option>
+                    <option value={option.value}>{option.label}</option>
                   ))}
                 </select>
+                <p
+                  id={errorId(field.id)}
+                  data-field-error-for={field.name}
+                  hidden
+                  class="text-sm leading-5 text-danger"
+                />
+              </div>
+            ) : field.id === "reference-data-git" ? (
+              <div class="grid min-w-0 gap-2 [min-inline-size:0]">
+                <label
+                  for={field.id}
+                  class="text-sm font-semibold text-text [overflow-wrap:anywhere]"
+                >
+                  {field.label}
+                  <span class="ml-1 font-mono text-xs text-review">
+                    required
+                  </span>
+                </label>
+                <select
+                  id={field.id}
+                  name={field.name}
+                  required
+                  aria-describedby={errorId(field.id)}
+                  class="min-h-11 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
+                >
+                  <option value="">Select an answer</option>
+                  {referenceDataGitOptions.map((option) => (
+                    <option value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                <p
+                  id={errorId(field.id)}
+                  data-field-error-for={field.name}
+                  hidden
+                  class="text-sm leading-5 text-danger"
+                />
               </div>
             ) : (
               <div
@@ -154,9 +296,19 @@ const workflowOptions = [
                 </label>
                 <textarea
                   id={field.id}
+                  name={field.name}
                   required={field.required}
+                  minlength={field.minLength}
+                  maxlength={field.maxLength}
                   rows={field.featured ? "5" : "4"}
+                  aria-describedby={errorId(field.id)}
                   class="min-h-28 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
+                />
+                <p
+                  id={errorId(field.id)}
+                  data-field-error-for={field.name}
+                  hidden
+                  class="text-sm leading-5 text-danger"
                 />
               </div>
             ),
@@ -165,6 +317,79 @@ const workflowOptions = [
       </div>
     </fieldset>
 
+    <fieldset
+      class="min-w-0 max-w-full rounded-lg border border-border bg-surface p-4 [min-inline-size:0]"
+    >
+      <legend
+        class="max-w-full px-1 font-mono text-sm font-semibold text-text [overflow-wrap:anywhere]"
+      >
+        Consent
+      </legend>
+      <div class="mt-4 grid min-w-0 gap-4 [min-inline-size:0]">
+        <div class="grid min-w-0 gap-2 [min-inline-size:0]">
+          <label
+            for="processing-consent"
+            class="flex min-w-0 items-start gap-3 text-sm font-semibold leading-6 text-text"
+          >
+            <input
+              id="processing-consent"
+              name="processingConsent"
+              type="checkbox"
+              required
+              aria-describedby="processing-consent-error"
+              class="mt-1 size-4 shrink-0 rounded border border-border bg-bg-muted accent-[var(--color-accent)]"
+            />
+            <span>
+              I consent to DbState using this information to evaluate my Private
+              Beta application and contact me about the application.
+              <span class="ml-1 font-mono text-xs text-review">required</span>
+            </span>
+          </label>
+          <p
+            id="processing-consent-error"
+            data-field-error-for="processingConsent"
+            hidden
+            class="text-sm leading-5 text-danger"
+          >
+          </p>
+        </div>
+        <div class="grid min-w-0 gap-2 [min-inline-size:0]">
+          <label
+            for="future-updates-opt-in"
+            class="flex min-w-0 items-start gap-3 text-sm font-semibold leading-6 text-text"
+          >
+            <input
+              id="future-updates-opt-in"
+              name="futureUpdatesOptIn"
+              type="checkbox"
+              class="mt-1 size-4 shrink-0 rounded border border-border bg-bg-muted accent-[var(--color-accent)]"
+            />
+            <span>I would also like occasional updates about DbState.</span>
+          </label>
+        </div>
+      </div>
+    </fieldset>
+
+    {
+      isInteractive && (
+        <div class="min-w-0 max-w-full rounded-lg border border-border bg-surface p-4 [min-inline-size:0]">
+          <StatusBadge label="verification required" tone="review" />
+          <div
+            data-turnstile-container
+            class="mt-4 min-h-20 min-w-0 max-w-full overflow-hidden [min-inline-size:0]"
+          />
+          <p
+            id="turnstile-status"
+            data-turnstile-status
+            aria-live="polite"
+            class="mt-3 text-sm leading-6 text-text-muted [overflow-wrap:anywhere]"
+          >
+            Complete verification before submitting the application.
+          </p>
+        </div>
+      )
+    }
+
     <div
       class="min-w-0 max-w-full rounded-lg border border-border-strong bg-bg-muted p-4 [min-inline-size:0]"
     >
@@ -172,24 +397,40 @@ const workflowOptions = [
         class="flex min-w-0 flex-wrap items-start justify-between gap-4 [min-inline-size:0]"
       >
         <div class="min-w-0 max-w-3xl [min-inline-size:0]">
-          <StatusBadge label="intake disabled" tone="review" />
+          <StatusBadge label={statusLabel} tone="review" />
           <p
-            id="application-disabled-note"
+            id="application-intake-note"
             class="mt-4 text-sm leading-6 text-text-muted [overflow-wrap:anywhere]"
           >
-            The questionnaire is ready, but submission handling is being
-            connected separately. No information entered on this page is
-            transmitted or stored.
+            {statusNote}
+          </p>
+          <p
+            data-submission-status
+            aria-live="polite"
+            class="mt-3 text-sm leading-6 text-text-muted [overflow-wrap:anywhere]"
+          >
           </p>
         </div>
         <button
           type="submit"
           disabled
-          class="inline-flex min-h-11 max-w-full cursor-not-allowed items-center justify-center whitespace-normal rounded-md border border-border bg-surface px-4 py-2 text-center text-sm font-semibold text-text-soft opacity-70"
+          data-submit-button
+          class:list={[
+            "inline-flex min-h-11 max-w-full items-center justify-center whitespace-normal rounded-md border px-4 py-2 text-center text-sm font-semibold",
+            isInteractive
+              ? "border-accent bg-accent text-bg hover:bg-accent-strong disabled:cursor-not-allowed disabled:border-border disabled:bg-surface disabled:text-text-soft disabled:opacity-70"
+              : "cursor-not-allowed border-border bg-surface text-text-soft opacity-70",
+          ]}
         >
-          Application intake is not connected yet
+          {submitLabel}
         </button>
       </div>
     </div>
   </form>
+
+  {
+    isInteractive && (
+      <script>import "../../scripts/private-beta-application";</script>
+    )
+  }
 </SectionContainer>

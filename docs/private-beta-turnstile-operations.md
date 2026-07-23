@@ -2,7 +2,7 @@
 
 This document captures the current Cloudflare Turnstile operational boundary for the DbState Private Beta application API.
 
-Public intake remains disabled. Do not deploy, install secrets, connect the browser widget, or enable form submission unless that work is explicitly approved in a later operational slice.
+Public intake remains disabled. Do not deploy, install secrets, switch the public build to enabled mode, or enable application submission unless that work is explicitly approved in a later operational slice.
 
 ## Provisioned Widget
 
@@ -70,18 +70,65 @@ While disabled, `POST /api/private-beta-applications` returns `503 intake_disabl
 
 ## Browser Integration Boundary
 
-The Private Beta browser form remains disabled and disconnected.
+The Private Beta browser form defaults to disabled closed-intake behavior.
 
-This slice does not add:
+In the default public build:
 
-- Turnstile browser widget markup
-- Turnstile client script
-- form submission JavaScript
-- field `name` attributes
-- an enabled submit button
-- public intake
+- `PUBLIC_PRIVATE_BETA_INTAKE_MODE` is missing or `disabled`
+- no Turnstile browser script is loaded
+- no Turnstile widget is rendered
+- no API submission handler is installed
+- the submit button remains disabled
+- no information entered on the page is transmitted to or stored by DbState
 
-The Playwright quality gate continues to verify that the form is non-submitting and no Turnstile widget is loaded yet.
+Focused browser tests use:
+
+```text
+PUBLIC_PRIVATE_BETA_INTAKE_MODE=test
+PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+```
+
+Test mode renders Turnstile explicitly, uses mocked API responses, and does not contact remote D1 or use the production Turnstile secret.
+
+A future enabled build must provide the real public sitekey through:
+
+```text
+PUBLIC_TURNSTILE_SITE_KEY
+```
+
+Enabled mode must not use Cloudflare's test sitekey.
+
+The Playwright quality gate continues to verify that the default production-style build is non-submitting and no Turnstile widget is loaded. A focused Playwright suite verifies the test-mode client integration.
+
+## Client Token Lifecycle
+
+The browser client loads:
+
+```text
+https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit
+```
+
+only in public `test` or future `enabled` mode.
+
+The widget is rendered with:
+
+```text
+action=private-beta-application
+theme=dark
+```
+
+On successful verification, the client stores the token in memory only and sends it as `turnstileToken` in the same-origin JSON API request.
+
+The token is cleared and verification is reset when:
+
+- the challenge expires
+- the challenge reports an error
+- the challenge times out
+- the API returns a recoverable failure
+- a network failure occurs
+- the application succeeds
+
+The token is not written to local storage, session storage, cookies, DOM data attributes, URL parameters, analytics, or persisted drafts.
 
 ## Test Behavior
 
@@ -90,6 +137,8 @@ Worker tests run with `PRIVATE_BETA_INTAKE_MODE=test` and inject deterministic m
 Automated tests do not call the real Siteverify endpoint and do not use production Turnstile credentials.
 
 The tests verify that failed Turnstile validation writes no D1 application rows or status-history rows.
+
+Focused browser tests use Cloudflare's published always-pass public test sitekey and intercept the Turnstile browser script with a deterministic test double. Browser tests mock application API responses and do not use a test secret key in browser code.
 
 ## Secret Installation Boundary
 
@@ -114,9 +163,9 @@ Do not run either command from routine validation.
 Before public intake can be enabled, later reviewed slices must:
 
 - install the production Turnstile secret
-- connect the browser-side Turnstile widget
-- connect form submission
-- verify D1 migrations in the intended remote environments
+- switch the public page mode to `enabled`
+- switch the Worker intake mode through the deployment process
 - run upload and deployment validation
 - decide the operational rollout path
+- add email notification if approved
 - update public privacy documentation if application intake starts collecting submitted answers
