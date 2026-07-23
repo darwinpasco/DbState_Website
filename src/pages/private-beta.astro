@@ -1,15 +1,34 @@
 ---
-import PlaceholderPage from "../components/ui/PlaceholderPage.astro";
+import ApplicationQuestionnaireSection from "../components/private-beta/ApplicationQuestionnaireSection.astro";
+import BetaLimitationsSection from "../components/private-beta/BetaLimitationsSection.astro";
+import BetaScopeSection from "../components/private-beta/BetaScopeSection.astro";
+import EvaluationWorkflowsSection from "../components/private-beta/EvaluationWorkflowsSection.astro";
+import IntakeStatusSection from "../components/private-beta/IntakeStatusSection.astro";
+import ParticipantAsksSection from "../components/private-beta/ParticipantAsksSection.astro";
+import ParticipantsReceiveSection from "../components/private-beta/ParticipantsReceiveSection.astro";
+import PrivateBetaHeroSection from "../components/private-beta/PrivateBetaHeroSection.astro";
+import ProductSafetyLinksSection from "../components/private-beta/ProductSafetyLinksSection.astro";
+import SafetyPrivacyNoteSection from "../components/private-beta/SafetyPrivacyNoteSection.astro";
+import TechnicalEnvironmentSection from "../components/private-beta/TechnicalEnvironmentSection.astro";
+import WhoShouldApplySection from "../components/private-beta/WhoShouldApplySection.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Private Beta | DbState"
-  description="A placeholder for requesting DbState private beta access. Form submission is not implemented yet."
+  title="DbState Private Beta | PostgreSQL database state in Git"
+  description="Request access to the DbState Private Beta for local Windows and PostgreSQL workflows using Git-managed database objects, reference data, comparison, and review-only release artifacts."
+  canonicalPath="/private-beta/"
 >
-  <PlaceholderPage
-    eyebrow="Private Beta"
-    title="Private Beta access"
-    description="This route is reserved for a future private beta intake experience. The initial foundation does not implement form submission, email delivery, or CRM integration."
-  />
+  <PrivateBetaHeroSection />
+  <BetaScopeSection />
+  <WhoShouldApplySection />
+  <TechnicalEnvironmentSection />
+  <EvaluationWorkflowsSection />
+  <ParticipantsReceiveSection />
+  <ParticipantAsksSection />
+  <BetaLimitationsSection />
+  <ApplicationQuestionnaireSection />
+  <IntakeStatusSection />
+  <SafetyPrivacyNoteSection />
+  <ProductSafetyLinksSection />
 </BaseLayout>

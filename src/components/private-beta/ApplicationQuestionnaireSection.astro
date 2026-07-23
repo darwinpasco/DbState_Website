@@ -1,0 +1,171 @@
+---
+import {
+  questionnaireGroups,
+  questionnaireTextAreas,
+} from "../../data/privateBetaPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import SectionHeading from "../layout/SectionHeading.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+
+const workflowOptions = [
+  "Schema Compare: Database to Repository",
+  "Schema Compare: Repository to Database",
+  "Reference Data Compare: Database to Repository",
+  "Reference Data Compare: Repository to Database",
+  "Not sure yet",
+];
+---
+
+<SectionContainer id="application" ariaLabelledby="application-heading">
+  <SectionHeading
+    id="application-heading"
+    eyebrow="Application questionnaire"
+    title="Private Beta application questions."
+    description="The questionnaire is a preview of the information that will be requested when intake submission is connected. It is shown as a real form so labels, grouping, and required fields can be reviewed before submission handling is added."
+  />
+
+  <form
+    class="mt-8 grid gap-5"
+    aria-describedby="application-disabled-note"
+    autocomplete="off"
+  >
+    {
+      questionnaireGroups.map((group) => (
+        <fieldset class="rounded-lg border border-border bg-surface p-4">
+          <legend class="px-1 font-mono text-sm font-semibold text-text">
+            {group.legend}
+          </legend>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            {group.fields.map((field) => (
+              <div class="grid gap-2">
+                <label for={field.id} class="text-sm font-semibold text-text">
+                  {field.label}
+                  {field.required && (
+                    <span class="ml-1 font-mono text-xs text-review">
+                      required
+                    </span>
+                  )}
+                </label>
+                <input
+                  id={field.id}
+                  type={field.type}
+                  required={field.required}
+                  autocomplete={field.autocomplete ?? "off"}
+                  class="min-h-11 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none focus:border-accent"
+                />
+              </div>
+            ))}
+          </div>
+        </fieldset>
+      ))
+    }
+
+    <fieldset class="rounded-lg border border-border bg-surface p-4">
+      <legend class="px-1 font-mono text-sm font-semibold text-text">
+        Current workflow
+      </legend>
+      <div class="mt-4 grid gap-4">
+        {
+          questionnaireTextAreas.slice(0, 4).map((field) => (
+            <div class="grid gap-2">
+              <label for={field.id} class="text-sm font-semibold text-text">
+                {field.label}
+                {field.required && (
+                  <span class="ml-1 font-mono text-xs text-review">
+                    required
+                  </span>
+                )}
+              </label>
+              <textarea
+                id={field.id}
+                required={field.required}
+                rows="4"
+                class="min-h-28 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none focus:border-accent"
+              />
+            </div>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="rounded-lg border border-border bg-surface p-4">
+      <legend class="px-1 font-mono text-sm font-semibold text-text">
+        Evaluation problem
+      </legend>
+      <div class="mt-4 grid gap-4">
+        {
+          questionnaireTextAreas.slice(4).map((field) =>
+            field.id === "first-workflow" ? (
+              <div class="grid gap-2">
+                <label for={field.id} class="text-sm font-semibold text-text">
+                  {field.label}
+                  {field.required && (
+                    <span class="ml-1 font-mono text-xs text-review">
+                      required
+                    </span>
+                  )}
+                </label>
+                <select
+                  id={field.id}
+                  required={field.required}
+                  class="min-h-11 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none focus:border-accent"
+                >
+                  <option value="">Select a workflow</option>
+                  {workflowOptions.map((option) => (
+                    <option value={option}>{option}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div
+                class:list={[
+                  "grid gap-2",
+                  field.featured &&
+                    "rounded-lg border border-border-strong bg-bg-muted p-4",
+                ]}
+              >
+                <label for={field.id} class="text-sm font-semibold text-text">
+                  {field.label}
+                  {field.required && (
+                    <span class="ml-1 font-mono text-xs text-review">
+                      required
+                    </span>
+                  )}
+                </label>
+                <textarea
+                  id={field.id}
+                  required={field.required}
+                  rows={field.featured ? "5" : "4"}
+                  class="min-h-28 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none focus:border-accent"
+                />
+              </div>
+            ),
+          )
+        }
+      </div>
+    </fieldset>
+
+    <div class="rounded-lg border border-border-strong bg-bg-muted p-4">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="max-w-3xl">
+          <StatusBadge label="intake disabled" tone="review" />
+          <p
+            id="application-disabled-note"
+            class="mt-4 text-sm leading-6 text-text-muted"
+          >
+            The questionnaire is ready, but submission handling is being
+            connected separately. No information entered on this page is
+            transmitted or stored.
+          </p>
+        </div>
+        <button
+          type="submit"
+          disabled
+          class="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-soft opacity-70"
+        >
+          Application intake is not connected yet
+        </button>
+      </div>
+    </div>
+  </form>
+</SectionContainer>
