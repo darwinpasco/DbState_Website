@@ -18,7 +18,12 @@
     "test:worker": "node ./scripts/worker-test-command.mjs run",
     "test:worker:watch": "node ./scripts/worker-test-command.mjs",
     "generate:worker-types": "wrangler types",
-    "quality": "npm run validate && npm run test:worker && npm run test:e2e",
+    "validate:wrangler-config": "node ./scripts/validate-wrangler-config.mjs",
+    "d1:migrations:list:preview": "wrangler d1 migrations list PRIVATE_BETA_DB --remote --preview",
+    "d1:migrations:apply:preview": "wrangler d1 migrations apply PRIVATE_BETA_DB --remote --preview",
+    "d1:migrations:list:production": "wrangler d1 migrations list PRIVATE_BETA_DB --remote",
+    "d1:migrations:apply:production": "wrangler d1 migrations apply PRIVATE_BETA_DB --remote",
+    "quality": "npm run validate && npm run validate:wrangler-config && npm run test:worker && npm run test:e2e",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

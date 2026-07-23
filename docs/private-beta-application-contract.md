@@ -2,7 +2,7 @@
 
 This document describes the versioned backend contract for future DbState Private Beta application intake.
 
-The public website form remains disabled in this slice. No browser submission is connected, no email is sent, no Turnstile validation is included, and no remote D1 database has been created.
+The public website form remains disabled in this slice. No browser submission is connected, no email is sent, and no Turnstile validation is included. Production and preview D1 database IDs are configured in `wrangler.jsonc`, but this contract slice does not apply remote migrations or enable public intake.
 
 ## Endpoint
 
@@ -32,6 +32,8 @@ When disabled, a POST returns `503 Service Unavailable` without validating or pe
 ```
 
 Worker tests use `PRIVATE_BETA_INTAKE_MODE=test` with a locally simulated D1 binding.
+
+The production and preview D1 databases use the single Worker binding `PRIVATE_BETA_DB`. See [Private Beta D1 Operations](./private-beta-d1-operations.md) for the configured IDs and migration commands.
 
 ## Request Body
 
@@ -219,6 +221,21 @@ The D1 schema does not store:
 
 ## Later Work Required Before Enabling Intake
 
-Before public intake can be enabled, later reviewed slices must connect the disabled browser form, create and bind a remote D1 database, decide and implement abuse protection such as Turnstile, add notification email if approved, and update operational privacy documentation.
+Before public intake can be enabled, later reviewed slices must connect the disabled browser form, apply and verify remote D1 migrations, decide and implement abuse protection such as Turnstile, add notification email if approved, and update operational privacy documentation.
 
-This slice does not create Cloudflare resources and does not deploy.
+This slice does not deploy and does not enable public application submission.
+
+## Preview migration evidence
+
+Verified on 2026-07-23:
+
+- Preview database ID: `5b3e215c-0ecb-40eb-a4c4-794f913c9cee`
+- `0001_private_beta_applications.sql` applied successfully
+- No preview migrations remain pending
+- `private_beta_applications` exists
+- `private_beta_application_status_history` exists
+- Required indexes exist
+- Application count is `0`
+- Status-history count is `0`
+- Production migration remains unapplied
+- Public intake remains disabled
