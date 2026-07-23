@@ -215,6 +215,25 @@ async function openTestModeForm(page: Page) {
   return scriptRequests;
 }
 
+async function expectPrivacyLinkBesideConsent(page: Page) {
+  const processingConsent = page.locator('[name="processingConsent"]');
+  const privacyLink = page.getByRole("link", { name: "Privacy notice" });
+
+  await expect(privacyLink).toHaveAttribute("href", "/privacy/");
+  await expect(processingConsent).not.toBeChecked();
+
+  await page.evaluate(() => {
+    const privacyLinkElement = document.querySelector('a[href="/privacy/"]');
+    privacyLinkElement?.addEventListener(
+      "click",
+      (event) => event.preventDefault(),
+      { once: true },
+    );
+  });
+  await privacyLink.click();
+  await expect(processingConsent).not.toBeChecked();
+}
+
 function apiJsonResponse(body: unknown, status: number) {
   return {
     status,
@@ -229,6 +248,7 @@ test("test mode renders Turnstile explicitly and handles callbacks", async ({
   const scriptRequests = await openTestModeForm(page);
 
   expect(scriptRequests).toEqual([turnstileScriptUrl]);
+  await expectPrivacyLinkBesideConsent(page);
   await expect(
     page.getByRole("button", { name: "Submit Private Beta application" }),
   ).toBeDisabled();

@@ -50,6 +50,9 @@ test("private beta questionnaire remains disabled and non-submitting", async ({
   await expect(page.locator("body")).toContainText(
     "No information entered on this page is transmitted to or stored by DbState while application intake is closed.",
   );
+  await expect(
+    page.getByRole("link", { name: "Privacy notice" }),
+  ).toHaveAttribute("href", "/privacy/");
   await expect(page.locator("body")).toContainText(
     "Describe the last database change that was difficult to review, reproduce, or release.",
   );

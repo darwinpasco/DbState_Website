@@ -1,0 +1,36 @@
+---
+import { privacyHero } from "../../data/privacyPage";
+import SectionContainer from "../layout/SectionContainer.astro";
+import StatusBadge from "../ui/StatusBadge.astro";
+---
+
+<SectionContainer ariaLabelledby="privacy-heading" class="pb-10">
+  <div class="grid gap-8 lg:grid-cols-[0.95fr_0.55fr] lg:items-end">
+    <div class="max-w-[var(--db-reading-width)]">
+      <p
+        class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+      >
+        {privacyHero.eyebrow}
+      </p>
+      <h1
+        id="privacy-heading"
+        class="mt-4 text-4xl font-semibold tracking-normal text-text md:text-5xl"
+      >
+        {privacyHero.title}
+      </h1>
+      <p class="mt-5 text-lg leading-8 text-text-muted">
+        {privacyHero.description}
+      </p>
+    </div>
+
+    <aside class="rounded-lg border border-border bg-surface p-5">
+      <StatusBadge label="privacy notice" tone="review" />
+      <p class="mt-4 text-sm leading-6 text-text-muted">
+        {privacyHero.status}
+      </p>
+      <p class="mt-4 font-mono text-sm text-text">
+        {privacyHero.effectiveDate}
+      </p>
+    </aside>
+  </div>
+</SectionContainer>

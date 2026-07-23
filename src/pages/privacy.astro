@@ -1,0 +1,25 @@
+---
+import PrivacyHeroSection from "../components/privacy/PrivacyHeroSection.astro";
+import PrivacyNoticeSection from "../components/privacy/PrivacyNoticeSection.astro";
+import { privacyMetadata, privacySections } from "../data/privacyPage";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title={privacyMetadata.title}
+  description={privacyMetadata.description}
+  canonicalPath="/privacy/"
+>
+  <PrivacyHeroSection />
+
+  <section
+    class="mx-auto grid w-full max-w-[var(--db-content-width)] gap-5 px-[var(--db-space-page)] pb-16 md:pb-24"
+    aria-label="Privacy notice details"
+  >
+    {
+      privacySections.map((section) => (
+        <PrivacyNoticeSection section={section} />
+      ))
+    }
+  </section>
+</BaseLayout>

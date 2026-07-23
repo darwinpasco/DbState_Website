@@ -10,6 +10,11 @@ export const navigationItems: NavigationItem[] = [
   { label: "Private Beta", href: "/private-beta" },
 ];
 
+export const footerNavigationItems: NavigationItem[] = [
+  ...navigationItems,
+  { label: "Privacy", href: "/privacy" },
+];
+
 export const primaryCta = {
   label: "Request Private Beta Access",
   href: "/private-beta",
