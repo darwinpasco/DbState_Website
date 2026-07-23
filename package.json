@@ -7,10 +7,15 @@
     "dev": "node ./scripts/astro-command.mjs dev",
     "build": "node ./scripts/astro-command.mjs build",
     "preview": "npm run build && wrangler dev",
+    "preview:astro": "node ./scripts/astro-command.mjs preview --host 127.0.0.1 --port 4321",
     "check": "node ./scripts/astro-command.mjs check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "validate": "npm run format:check && npm run check && npm run build",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:install": "playwright install chromium",
+    "quality": "npm run validate && npm run test:e2e",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
@@ -20,6 +25,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@playwright/test": "^1.61.1",
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.9.2",

@@ -25,20 +25,23 @@ const workflowOptions = [
   />
 
   <form
-    class="mt-8 grid gap-5"
+    class="mt-8 grid min-w-0 max-w-full gap-5 [min-inline-size:0]"
     aria-describedby="application-disabled-note"
     autocomplete="off"
   >
     {
       questionnaireGroups.map((group) => (
-        <fieldset class="rounded-lg border border-border bg-surface p-4">
-          <legend class="px-1 font-mono text-sm font-semibold text-text">
+        <fieldset class="min-w-0 max-w-full rounded-lg border border-border bg-surface p-4 [min-inline-size:0]">
+          <legend class="max-w-full px-1 font-mono text-sm font-semibold text-text [overflow-wrap:anywhere]">
             {group.legend}
           </legend>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
+          <div class="mt-4 grid min-w-0 gap-4 [min-inline-size:0] md:grid-cols-2">
             {group.fields.map((field) => (
-              <div class="grid gap-2">
-                <label for={field.id} class="text-sm font-semibold text-text">
+              <div class="grid min-w-0 gap-2 [min-inline-size:0]">
+                <label
+                  for={field.id}
+                  class="text-sm font-semibold text-text [overflow-wrap:anywhere]"
+                >
                   {field.label}
                   {field.required && (
                     <span class="ml-1 font-mono text-xs text-review">
@@ -51,7 +54,7 @@ const workflowOptions = [
                   type={field.type}
                   required={field.required}
                   autocomplete={field.autocomplete ?? "off"}
-                  class="min-h-11 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none focus:border-accent"
+                  class="min-h-11 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
                 />
               </div>
             ))}
@@ -60,15 +63,22 @@ const workflowOptions = [
       ))
     }
 
-    <fieldset class="rounded-lg border border-border bg-surface p-4">
-      <legend class="px-1 font-mono text-sm font-semibold text-text">
+    <fieldset
+      class="min-w-0 max-w-full rounded-lg border border-border bg-surface p-4 [min-inline-size:0]"
+    >
+      <legend
+        class="max-w-full px-1 font-mono text-sm font-semibold text-text [overflow-wrap:anywhere]"
+      >
         Current workflow
       </legend>
-      <div class="mt-4 grid gap-4">
+      <div class="mt-4 grid min-w-0 gap-4 [min-inline-size:0]">
         {
           questionnaireTextAreas.slice(0, 4).map((field) => (
-            <div class="grid gap-2">
-              <label for={field.id} class="text-sm font-semibold text-text">
+            <div class="grid min-w-0 gap-2 [min-inline-size:0]">
+              <label
+                for={field.id}
+                class="text-sm font-semibold text-text [overflow-wrap:anywhere]"
+              >
                 {field.label}
                 {field.required && (
                   <span class="ml-1 font-mono text-xs text-review">
@@ -80,7 +90,7 @@ const workflowOptions = [
                 id={field.id}
                 required={field.required}
                 rows="4"
-                class="min-h-28 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none focus:border-accent"
+                class="min-h-28 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
               />
             </div>
           ))
@@ -88,16 +98,23 @@ const workflowOptions = [
       </div>
     </fieldset>
 
-    <fieldset class="rounded-lg border border-border bg-surface p-4">
-      <legend class="px-1 font-mono text-sm font-semibold text-text">
+    <fieldset
+      class="min-w-0 max-w-full rounded-lg border border-border bg-surface p-4 [min-inline-size:0]"
+    >
+      <legend
+        class="max-w-full px-1 font-mono text-sm font-semibold text-text [overflow-wrap:anywhere]"
+      >
         Evaluation problem
       </legend>
-      <div class="mt-4 grid gap-4">
+      <div class="mt-4 grid min-w-0 gap-4 [min-inline-size:0]">
         {
           questionnaireTextAreas.slice(4).map((field) =>
             field.id === "first-workflow" ? (
-              <div class="grid gap-2">
-                <label for={field.id} class="text-sm font-semibold text-text">
+              <div class="grid min-w-0 gap-2 [min-inline-size:0]">
+                <label
+                  for={field.id}
+                  class="text-sm font-semibold text-text [overflow-wrap:anywhere]"
+                >
                   {field.label}
                   {field.required && (
                     <span class="ml-1 font-mono text-xs text-review">
@@ -108,7 +125,7 @@ const workflowOptions = [
                 <select
                   id={field.id}
                   required={field.required}
-                  class="min-h-11 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none focus:border-accent"
+                  class="min-h-11 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
                 >
                   <option value="">Select a workflow</option>
                   {workflowOptions.map((option) => (
@@ -119,12 +136,15 @@ const workflowOptions = [
             ) : (
               <div
                 class:list={[
-                  "grid gap-2",
+                  "grid min-w-0 gap-2 [min-inline-size:0]",
                   field.featured &&
                     "rounded-lg border border-border-strong bg-bg-muted p-4",
                 ]}
               >
-                <label for={field.id} class="text-sm font-semibold text-text">
+                <label
+                  for={field.id}
+                  class="text-sm font-semibold text-text [overflow-wrap:anywhere]"
+                >
                   {field.label}
                   {field.required && (
                     <span class="ml-1 font-mono text-xs text-review">
@@ -136,7 +156,7 @@ const workflowOptions = [
                   id={field.id}
                   required={field.required}
                   rows={field.featured ? "5" : "4"}
-                  class="min-h-28 rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none focus:border-accent"
+                  class="min-h-28 w-full min-w-0 max-w-full rounded-md border border-border bg-bg-muted px-3 py-2 text-sm leading-6 text-text outline-none [max-inline-size:100%] [min-inline-size:0] focus:border-accent"
                 />
               </div>
             ),
@@ -145,13 +165,17 @@ const workflowOptions = [
       </div>
     </fieldset>
 
-    <div class="rounded-lg border border-border-strong bg-bg-muted p-4">
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div class="max-w-3xl">
+    <div
+      class="min-w-0 max-w-full rounded-lg border border-border-strong bg-bg-muted p-4 [min-inline-size:0]"
+    >
+      <div
+        class="flex min-w-0 flex-wrap items-start justify-between gap-4 [min-inline-size:0]"
+      >
+        <div class="min-w-0 max-w-3xl [min-inline-size:0]">
           <StatusBadge label="intake disabled" tone="review" />
           <p
             id="application-disabled-note"
-            class="mt-4 text-sm leading-6 text-text-muted"
+            class="mt-4 text-sm leading-6 text-text-muted [overflow-wrap:anywhere]"
           >
             The questionnaire is ready, but submission handling is being
             connected separately. No information entered on this page is
@@ -161,7 +185,7 @@ const workflowOptions = [
         <button
           type="submit"
           disabled
-          class="inline-flex min-h-11 cursor-not-allowed items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-sm font-semibold text-text-soft opacity-70"
+          class="inline-flex min-h-11 max-w-full cursor-not-allowed items-center justify-center whitespace-normal rounded-md border border-border bg-surface px-4 py-2 text-center text-sm font-semibold text-text-soft opacity-70"
         >
           Application intake is not connected yet
         </button>

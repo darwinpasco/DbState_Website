@@ -1,0 +1,34 @@
+---
+import CtaLink from "../components/ui/CtaLink.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Page Not Found | DbState"
+  description="The requested DbState page could not be found."
+  canonicalPath="/404.html"
+>
+  <section
+    class="mx-auto w-full max-w-[var(--db-content-width)] px-[var(--db-space-page)] py-20 md:py-28"
+  >
+    <div class="max-w-[var(--db-reading-width)]">
+      <p
+        class="font-mono text-xs font-semibold uppercase tracking-normal text-accent"
+      >
+        404
+      </p>
+      <h1 class="mt-4 text-4xl font-semibold text-text md:text-5xl">
+        This page does not exist.
+      </h1>
+      <p class="mt-5 text-lg leading-8 text-text-muted">
+        The requested DbState page could not be found. Return to the product
+        overview or continue with the documentation.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <CtaLink href="/" label="Go to homepage" />
+        <CtaLink href="/product/" label="View Product" variant="secondary" />
+        <CtaLink href="/docs/" label="Open Documentation" variant="quiet" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
