@@ -32,6 +32,9 @@ jobs:
       - name: Run quality gate including Worker tests
         run: npm run quality
 
+      - name: Run Private Beta client integration tests
+        run: npm run test:e2e:private-beta-client
+
       - name: Validate Cloudflare static asset upload
         run: npx wrangler versions upload --dry-run
 

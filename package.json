@@ -14,6 +14,8 @@
     "validate": "npm run format:check && npm run check && npm run build",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
+    "test:e2e:private-beta-client": "node ./scripts/playwright-private-beta-client.mjs",
+    "test:e2e:private-beta-client:headed": "node ./scripts/playwright-private-beta-client.mjs --headed",
     "test:e2e:install": "playwright install chromium",
     "test:worker": "node ./scripts/worker-test-command.mjs run",
     "test:worker:watch": "node ./scripts/worker-test-command.mjs",

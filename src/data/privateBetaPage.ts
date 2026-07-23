@@ -1,8 +1,11 @@
 type QuestionnaireField = {
   id: string;
+  name: string;
   label: string;
   type: "text" | "email";
   required: boolean;
+  minLength: number;
+  maxLength: number;
   autocomplete?: string;
 };
 
@@ -13,8 +16,11 @@ type QuestionnaireGroup = {
 
 type QuestionnaireTextArea = {
   id: string;
+  name: string;
   label: string;
   required: boolean;
+  minLength: number;
+  maxLength: number;
   featured?: boolean;
 };
 
@@ -191,30 +197,42 @@ export const questionnaireGroups: QuestionnaireGroup[] = [
     fields: [
       {
         id: "name",
+        name: "fullName",
         label: "Name",
         type: "text",
         required: true,
+        minLength: 2,
+        maxLength: 120,
         autocomplete: "name",
       },
       {
         id: "work-email",
+        name: "workEmail",
         label: "Work email",
         type: "email",
         required: true,
+        minLength: 3,
+        maxLength: 254,
         autocomplete: "email",
       },
       {
         id: "company-team-project",
+        name: "companyTeamOrProject",
         label: "Company, team, or project",
         type: "text",
         required: true,
+        minLength: 2,
+        maxLength: 160,
         autocomplete: "organization",
       },
       {
         id: "role",
+        name: "role",
         label: "Role",
         type: "text",
         required: true,
+        minLength: 2,
+        maxLength: 120,
         autocomplete: "organization-title",
       },
     ],
@@ -224,27 +242,39 @@ export const questionnaireGroups: QuestionnaireGroup[] = [
     fields: [
       {
         id: "postgresql-versions",
+        name: "postgresqlVersions",
         label: "PostgreSQL version or versions",
         type: "text",
         required: true,
+        minLength: 1,
+        maxLength: 200,
       },
       {
         id: "windows-version",
+        name: "windowsVersion",
         label: "Windows version",
         type: "text",
         required: true,
+        minLength: 1,
+        maxLength: 120,
       },
       {
         id: "other-database-engines",
+        name: "otherDatabaseEngines",
         label: "Other database engines currently used",
         type: "text",
         required: false,
+        minLength: 0,
+        maxLength: 300,
       },
       {
         id: "git-hosting-workflow",
+        name: "gitWorkflow",
         label: "Git hosting or repository workflow, when applicable",
         type: "text",
         required: false,
+        minLength: 0,
+        maxLength: 1000,
       },
     ],
   },
@@ -253,50 +283,77 @@ export const questionnaireGroups: QuestionnaireGroup[] = [
 export const questionnaireTextAreas: QuestionnaireTextArea[] = [
   {
     id: "schema-workflow",
+    name: "schemaChangeProcess",
     label: "How are PostgreSQL schema changes managed today?",
     required: true,
+    minLength: 10,
+    maxLength: 2000,
   },
   {
     id: "reference-data-workflow",
+    name: "referenceDataProcess",
     label: "How is reference data managed today?",
     required: true,
+    minLength: 10,
+    maxLength: 2000,
   },
   {
     id: "database-reviewers",
+    name: "databaseReviewers",
     label: "Who reviews database changes?",
     required: true,
+    minLength: 2,
+    maxLength: 1000,
   },
   {
     id: "release-sql-process",
+    name: "releaseSqlProcess",
     label: "How are release SQL scripts prepared and executed?",
     required: true,
+    minLength: 10,
+    maxLength: 2000,
   },
   {
     id: "difficult-change",
+    name: "difficultChange",
     label:
       "Describe the last database change that was difficult to review, reproduce, or release.",
     required: true,
+    minLength: 20,
+    maxLength: 4000,
     featured: true,
   },
   {
     id: "first-workflow",
+    name: "firstWorkflow",
     label: "Which DbState workflow would you evaluate first?",
     required: true,
+    minLength: 1,
+    maxLength: 120,
   },
   {
     id: "important-object-types",
+    name: "importantObjectTypes",
     label: "Which PostgreSQL object types matter most?",
     required: true,
+    minLength: 2,
+    maxLength: 1000,
   },
   {
     id: "reference-data-git",
+    name: "managesReferenceDataInGit",
     label: "Do you manage reference-data tables through Git today?",
-    required: false,
+    required: true,
+    minLength: 1,
+    maxLength: 20,
   },
   {
     id: "useful-evaluation",
+    name: "evaluationGoals",
     label: "What would make the Private Beta evaluation useful?",
     required: true,
+    minLength: 10,
+    maxLength: 2000,
   },
 ];
 

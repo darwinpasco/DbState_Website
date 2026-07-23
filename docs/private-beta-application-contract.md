@@ -2,7 +2,7 @@
 
 This document describes the versioned backend contract for future DbState Private Beta application intake.
 
-The public website form remains disabled in this slice. No browser submission is connected and no email is sent. The Worker API requires server-side Cloudflare Turnstile validation before persistence when intake is in `test` or future `enabled` mode. Production and preview D1 database IDs are configured in `wrangler.jsonc`, but this contract slice does not apply remote migrations or enable public intake.
+The public website form remains closed by default. Browser submission is wired only for focused test-mode builds and future enabled builds. No email is sent. The Worker API requires server-side Cloudflare Turnstile validation before persistence when intake is in `test` or future `enabled` mode. Production and preview D1 database IDs are configured in `wrangler.jsonc`, and the initial migration has been verified separately. Public intake is still disabled.
 
 ## Endpoint
 
@@ -35,7 +35,35 @@ Worker tests use `PRIVATE_BETA_INTAKE_MODE=test` with a locally simulated D1 bin
 
 The production and preview D1 databases use the single Worker binding `PRIVATE_BETA_DB`. See [Private Beta D1 Operations](./private-beta-d1-operations.md) for the configured IDs and migration commands.
 
-Turnstile operations are documented in [Private Beta Turnstile Operations](./private-beta-turnstile-operations.md). The browser widget is not connected yet.
+Turnstile operations are documented in [Private Beta Turnstile Operations](./private-beta-turnstile-operations.md). The browser widget is loaded only in public `test` mode or a future public `enabled` mode.
+
+## Public Browser Mode
+
+The static Private Beta page has a separate build-time mode:
+
+```text
+PUBLIC_PRIVATE_BETA_INTAKE_MODE
+```
+
+Allowed values:
+
+- `disabled`
+- `test`
+- `enabled`
+
+Missing or invalid values default to `disabled`.
+
+In `disabled` mode, the page presents the questionnaire as a preview. The submit button remains disabled, no Turnstile script is loaded, no API submission handler is installed, and no information entered on the page is transmitted to or stored by DbState while application intake is closed.
+
+In `test` mode, focused Playwright tests use Cloudflare's always-pass public sitekey:
+
+```text
+1x00000000000000000000AA
+```
+
+The tests mock browser API responses and do not contact remote D1.
+
+In a future `enabled` mode, the page requires `PUBLIC_TURNSTILE_SITE_KEY`, renders Turnstile explicitly, waits for a verification token, and submits JSON to the same-origin API. The committed production build does not use this mode.
 
 ## Request Body
 
@@ -82,6 +110,8 @@ The request body accepts exactly these fields:
 ```
 
 Unexpected fields are rejected.
+
+The browser form uses matching `name` attributes for application fields, processing consent, optional future-updates consent, and workflow enum selections. It submits JSON through `fetch` and does not use native form submission, a form `action`, or a form `method`.
 
 ## Field Limits
 
@@ -135,6 +165,8 @@ The Worker requires:
 - `hostname` equal to `dbstate.com` or `www.dbstate.com`
 
 The Turnstile token is never stored in D1, logged, or returned in API responses.
+
+The browser client stores the token only in memory. It resets verification after failed submissions, expiration, timeout, or widget errors. Tokens are not written to local storage, session storage, cookies, URLs, analytics, or persisted drafts.
 
 ## Success Response
 
@@ -257,7 +289,7 @@ The D1 schema does not store:
 
 ## Later Work Required Before Enabling Intake
 
-Before public intake can be enabled, later reviewed slices must connect the disabled browser form, add the browser-side Turnstile widget, install the production Turnstile secret, verify remote D1 migrations, add notification email if approved, and update operational privacy documentation.
+Before public intake can be enabled, later reviewed slices must switch both Worker and public page modes through the deployment process, install the production Turnstile secret, run deployment validation, add notification email if approved, and update operational privacy documentation.
 
 This slice does not deploy and does not enable public application submission.
 
