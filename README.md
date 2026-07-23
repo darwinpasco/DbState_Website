@@ -171,6 +171,35 @@ tests use Cloudflare's always-pass public test sitekey and mocked API responses.
 See `docs/private-beta-turnstile-operations.md` for the operational boundary and
 future secret-installation notes.
 
+## Private Beta Email Notification
+
+After a valid future application request is validated, verified through
+Turnstile, and durably persisted in D1, the Worker schedules one internal
+notification email through the `PRIVATE_BETA_EMAIL` binding.
+
+```text
+Recipient: darwin@dbstate.com
+Sender: private-beta@dbstate.com
+Reply-To: darwin@dbstate.com
+```
+
+The notification includes only a minimal review summary: application reference,
+applicant name, work email, company, role, first workflow, PostgreSQL versions,
+submission timestamp, and retention date. It does not include free-text
+application narratives, Turnstile data, consent wording, or the full applicant
+record.
+
+Notification delivery happens after D1 persistence and does not change the
+public success response. A notification failure does not roll back the
+application record and does not trigger an automatic retry in this slice.
+Applicant acknowledgment email remains deferred.
+
+Email domain onboarding and Cloudflare Email Service readiness are operator
+prerequisites before any future enabled-intake deployment.
+
+See `docs/private-beta-email-notification-operations.md` for the notification
+operations boundary.
+
 ## Browser Quality Gate
 
 The repository includes Playwright tests for site-wide browser validation.
@@ -323,6 +352,24 @@ SITE_URL=https://dbstate.com npm run build
 
 The canonical production domain is `https://dbstate.com`.
 
+The default Open Graph and Twitter preview image is the committed homepage hero
+asset:
+
+```text
+public/social/dbstate-home-hero-v1.png
+```
+
+It is generated from the real homepage hero at `1200 x 630` with:
+
+```sh
+npm run capture:social-preview
+```
+
+The capture command builds the static site, starts an Astro preview on a local
+loopback port, captures the hero presentation, and stops only the preview
+process it started. The image is committed and verified by the browser metadata
+tests; it is not regenerated during normal builds or CI.
+
 The default robots metadata is currently `noindex, nofollow`, appropriate for a development-stage public website foundation. Revisit this before public launch.
 
 ## Manual Visual Review Checklist
@@ -385,5 +432,8 @@ The production Turnstile secret remains uninstalled. Email notification from
 - Server-side Turnstile validation is implemented for the Worker API, and the
   browser widget is wired for test-mode and future enabled builds. Production
   secret installation is deferred.
-- Email notifications to `darwin@dbstate.com` from `private-beta@dbstate.com` are documented for later slices only and are not implemented.
+- Internal notification email after durable Private Beta application
+  persistence is implemented. Public intake remains disabled, applicant
+  acknowledgment email is deferred, and notification retry or reconciliation is
+  not implemented.
 - Analytics, cookies, authentication, and backend services are intentionally out of scope.

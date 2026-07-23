@@ -169,5 +169,5 @@ Before public intake can be enabled, later reviewed slices must:
 - switch the Worker intake mode through the deployment process
 - run upload and deployment validation
 - decide the operational rollout path
-- add email notification if approved
+- verify internal email notification readiness
 - verify public privacy documentation and applicant privacy operations for the enabled workflow

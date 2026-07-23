@@ -9,6 +9,8 @@ type Props = {
   description?: string;
   canonicalPath?: string;
   robots?: string;
+  socialImagePath?: string;
+  socialImageAlt?: string;
 };
 
 const {
@@ -16,10 +18,15 @@ const {
   description = siteMetadata.defaultDescription,
   canonicalPath = Astro.url.pathname,
   robots = siteMetadata.defaultRobots,
+  socialImagePath = siteMetadata.defaultSocialImagePath,
+  socialImageAlt = siteMetadata.defaultSocialImageAlt,
 } = Astro.props;
 
 const canonicalUrl = Astro.site
   ? new URL(canonicalPath, Astro.site).toString()
+  : undefined;
+const socialImageUrl = Astro.site
+  ? new URL(socialImagePath, Astro.site).toString()
   : undefined;
 ---
 
@@ -37,9 +44,27 @@ const canonicalUrl = Astro.site
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+    {
+      socialImageUrl && (
+        <meta property="og:image:secure_url" content={socialImageUrl} />
+      )
+    }
+    <meta property="og:image:type" content="image/png" />
+    <meta
+      property="og:image:width"
+      content={String(siteMetadata.socialImageWidth)}
+    />
+    <meta
+      property="og:image:height"
+      content={String(siteMetadata.socialImageHeight)}
+    />
+    <meta property="og:image:alt" content={socialImageAlt} />
     <meta name="twitter:card" content={siteMetadata.twitterCard} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    {socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
+    <meta name="twitter:image:alt" content={socialImageAlt} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>

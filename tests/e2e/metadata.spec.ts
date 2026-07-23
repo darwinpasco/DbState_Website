@@ -1,6 +1,18 @@
 import { expect, test } from "@playwright/test";
 import { allStaticRoutes, docsArticles } from "./site";
 
+const socialImagePath = "/social/dbstate-home-hero-v1.png";
+const socialImageUrl = `https://dbstate.com${socialImagePath}`;
+
+function readPngDimensions(bytes: Uint8Array) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
+  return {
+    width: view.getUint32(16),
+    height: view.getUint32(20),
+  };
+}
+
 test.describe("metadata", () => {
   for (const route of allStaticRoutes) {
     test(`${route.path} has required metadata`, async ({ page }) => {
@@ -55,4 +67,67 @@ test.describe("metadata", () => {
       }
     });
   }
+});
+
+test("homepage social metadata uses the committed hero preview image", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    socialImageUrl,
+  );
+  await expect(
+    page.locator('meta[property="og:image:secure_url"]'),
+  ).toHaveAttribute("content", socialImageUrl);
+  await expect(page.locator('meta[property="og:image:type"]')).toHaveAttribute(
+    "content",
+    "image/png",
+  );
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+    "content",
+    "1200",
+  );
+  await expect(
+    page.locator('meta[property="og:image:height"]'),
+  ).toHaveAttribute("content", "630");
+  await expect(
+    page.locator('meta[property="og:image:alt"]'),
+  ).not.toHaveAttribute("content", "");
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+  await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+    "content",
+    socialImageUrl,
+  );
+  await expect(
+    page.locator('meta[name="twitter:image:alt"]'),
+  ).not.toHaveAttribute("content", "");
+
+  const socialMetadataValues = await page
+    .locator(
+      'meta[property="og:image"], meta[property="og:image:secure_url"], meta[name="twitter:image"]',
+    )
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("content") ?? ""),
+    );
+  for (const oldImageName of [
+    "reference-data-diff",
+    "schema-compare",
+    "object-diff",
+    "release-plan",
+    "example.com",
+  ]) {
+    expect(socialMetadataValues.join("\n")).not.toContain(oldImageName);
+  }
+
+  const imageResponse = await page.request.get(socialImagePath);
+  expect(imageResponse.ok()).toBe(true);
+  expect(readPngDimensions(await imageResponse.body())).toEqual({
+    width: 1200,
+    height: 630,
+  });
 });

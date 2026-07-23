@@ -25,6 +25,7 @@ export interface D1DatabaseLike {
 export interface PersistedApplication {
   applicationReference: string;
   submittedAt: string;
+  retentionUntil: string;
 }
 
 export class DuplicateApplicationError extends Error {
@@ -177,5 +178,6 @@ export async function persistApplication(
   return {
     applicationReference,
     submittedAt,
+    retentionUntil,
   };
 }

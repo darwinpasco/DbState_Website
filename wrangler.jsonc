@@ -5,6 +5,9 @@
   "compatibility_date": "2026-07-22",
   "vars": {
     "PRIVATE_BETA_INTAKE_MODE": "disabled",
+    "PRIVATE_BETA_NOTIFICATION_TO": "darwin@dbstate.com",
+    "PRIVATE_BETA_EMAIL_FROM": "private-beta@dbstate.com",
+    "PRIVATE_BETA_EMAIL_REPLY_TO": "darwin@dbstate.com",
     "TURNSTILE_EXPECTED_ACTION": "private-beta-application",
     "TURNSTILE_EXPECTED_HOSTNAMES": "dbstate.com,www.dbstate.com",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAD7ybcKG7AdVbfGm",
@@ -21,6 +24,13 @@
       "database_id": "97cd3f79-cc4a-4b05-a397-05d6057ab38e",
       "preview_database_id": "5b3e215c-0ecb-40eb-a4c4-794f913c9cee",
       "migrations_dir": "migrations",
+    },
+  ],
+  "send_email": [
+    {
+      "name": "PRIVATE_BETA_EMAIL",
+      "destination_address": "darwin@dbstate.com",
+      "allowed_sender_addresses": ["private-beta@dbstate.com"],
     },
   ],
 }

@@ -115,7 +115,8 @@ The public Privacy page does not expose D1 database UUIDs. It states that produc
 - Public intake remains disabled.
 - Worker tests use a locally simulated D1 binding and mocked Turnstile Siteverify responses.
 - Remote migrations are not applied by validation or quality scripts.
-- No email notification is implemented.
+- Internal notification email is implemented after durable persistence, but
+  applicant acknowledgment email and notification retry are deferred.
 - Server-side Turnstile validation is implemented for the Worker API, and the browser widget is wired only for test-mode and future enabled builds.
 - The production Turnstile secret is not stored in this repository.
 - No deployment occurs from this repository task.

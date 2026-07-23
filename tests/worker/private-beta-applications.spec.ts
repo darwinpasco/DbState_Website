@@ -13,6 +13,7 @@ import type {
   D1DatabaseLike,
   D1PreparedStatementLike,
 } from "../../worker/private-beta/application-repository";
+import type { SendEmailBinding } from "../../worker/private-beta/application-notification";
 import type { SiteverifyFetch } from "../../worker/private-beta/turnstile-validation";
 
 const endpoint = "https://dbstate.com/api/private-beta-applications";
@@ -88,10 +89,24 @@ function createAssetsBinding() {
   };
 }
 
+function createEmailBinding(
+  implementation: SendEmailBinding["send"] = async () => ({
+    messageId: "test-message",
+  }),
+) {
+  return {
+    send: vi.fn(implementation),
+  };
+}
+
 function createEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
   return {
     ASSETS: createAssetsBinding(),
     PRIVATE_BETA_DB: env.PRIVATE_BETA_DB,
+    PRIVATE_BETA_EMAIL: createEmailBinding(),
+    PRIVATE_BETA_NOTIFICATION_TO: "darwin@dbstate.com",
+    PRIVATE_BETA_EMAIL_FROM: "private-beta@dbstate.com",
+    PRIVATE_BETA_EMAIL_REPLY_TO: "darwin@dbstate.com",
     PRIVATE_BETA_INTAKE_MODE: "test",
     TURNSTILE_EXPECTED_ACTION,
     TURNSTILE_EXPECTED_HOSTNAMES: "dbstate.com,www.dbstate.com",
@@ -116,6 +131,23 @@ function jsonRequest(body: unknown, init: RequestInit = {}, url = endpoint) {
 
 async function fetchWorker(request: Request, testEnv = createEnv()) {
   return worker.fetch(request, testEnv);
+}
+
+async function fetchWorkerWithWaitUntil(
+  request: Request,
+  testEnv = createEnv(),
+) {
+  const waitUntilPromises: Promise<unknown>[] = [];
+  const response = await worker.fetch(request, testEnv, {
+    waitUntil: (promise: Promise<unknown>) => {
+      waitUntilPromises.push(promise);
+    },
+  });
+
+  return {
+    response,
+    waitUntilPromises,
+  };
 }
 
 async function readJson(response: Response) {
@@ -180,10 +212,12 @@ describe("private beta application routing", () => {
 describe("private beta disabled mode", () => {
   test("POST returns 503 without validation or D1 writes", async () => {
     const siteverifyFetch = createSiteverifyFetch();
+    const emailBinding = createEmailBinding();
     const response = await fetchWorker(
       jsonRequest({ unexpected: "field" }),
       createEnv({
         PRIVATE_BETA_INTAKE_MODE: "disabled",
+        PRIVATE_BETA_EMAIL: emailBinding,
         TURNSTILE_SITEVERIFY_FETCH: siteverifyFetch,
       }),
     );
@@ -197,6 +231,7 @@ describe("private beta disabled mode", () => {
       },
     });
     expect(siteverifyFetch).not.toHaveBeenCalled();
+    expect(emailBinding.send).not.toHaveBeenCalled();
     expect(await applicationCount()).toBe(0);
     expect(await historyCount()).toBe(0);
   });
@@ -580,6 +615,170 @@ describe("private beta persistence", () => {
     ).first<{ future_updates_opt_in: number }>();
 
     expect(application?.future_updates_opt_in).toBe(1);
+  });
+});
+
+describe("private beta notification email", () => {
+  test("validation failure does not send email", async () => {
+    const emailBinding = createEmailBinding();
+    const response = await fetchWorker(
+      jsonRequest({}),
+      createEnv({ PRIVATE_BETA_EMAIL: emailBinding }),
+    );
+
+    expect(response.status).toBe(422);
+    expect(emailBinding.send).not.toHaveBeenCalled();
+    expect(await applicationCount()).toBe(0);
+    expect(await historyCount()).toBe(0);
+  });
+
+  test("Turnstile failure does not send email", async () => {
+    const emailBinding = createEmailBinding();
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        PRIVATE_BETA_EMAIL: emailBinding,
+        TURNSTILE_SITEVERIFY_FETCH: createSiteverifyFetch({ success: false }),
+      }),
+    );
+
+    expect(response.status).toBe(422);
+    expect(emailBinding.send).not.toHaveBeenCalled();
+    expect(await applicationCount()).toBe(0);
+    expect(await historyCount()).toBe(0);
+  });
+
+  test("D1 persistence failure does not send email", async () => {
+    const emailBinding = createEmailBinding();
+    const statement: D1PreparedStatementLike = {
+      bind: () => statement,
+      first: async () => null,
+      all: async () => ({ results: [] }),
+      run: async () => ({}),
+    };
+    const failingDb: D1DatabaseLike = {
+      prepare: () => statement,
+      batch: async () => {
+        throw new Error("raw sqlite failure");
+      },
+    };
+
+    const response = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({
+        PRIVATE_BETA_DB: failingDb,
+        PRIVATE_BETA_EMAIL: emailBinding,
+      }),
+    );
+
+    expect(response.status).toBe(500);
+    expect(emailBinding.send).not.toHaveBeenCalled();
+  });
+
+  test("successful persistence schedules exactly one minimal internal email", async () => {
+    const emailBinding = createEmailBinding();
+    const { response, waitUntilPromises } = await fetchWorkerWithWaitUntil(
+      jsonRequest(validApplication()),
+      createEnv({ PRIVATE_BETA_EMAIL: emailBinding }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(201);
+    expect(waitUntilPromises).toHaveLength(1);
+    await Promise.all(waitUntilPromises);
+    expect(emailBinding.send).toHaveBeenCalledOnce();
+
+    const message = emailBinding.send.mock.calls[0]![0];
+    expect(message.to).toBe("darwin@dbstate.com");
+    expect(message.from).toEqual({
+      email: "private-beta@dbstate.com",
+      name: "DbState Private Beta",
+    });
+    expect(message.replyTo).toBe("darwin@dbstate.com");
+    expect(message.subject).toBe(
+      `[DbState Private Beta] New application ${body.applicationReference}`,
+    );
+    expect(message.text).toContain(String(body.applicationReference));
+    expect(message.text).toContain("Test Evaluator");
+    expect(message.text).toContain("evaluator@example.invalid");
+    expect(message.text).toContain("Example database team");
+    expect(message.text).toContain("Database engineer");
+    expect(message.text).toContain("schema-repository-to-database");
+    expect(message.text).toContain("PostgreSQL 16");
+    expect(message.text).toContain(String(body.submittedAt));
+    expect(message.text).toContain(
+      "The complete application remains in the DbState Private Beta D1 record.",
+    );
+
+    for (const forbidden of [
+      validApplication().difficultChange,
+      validApplication().schemaChangeProcess,
+      validApplication().referenceDataProcess,
+      validApplication().releaseSqlProcess,
+      validApplication().evaluationGoals,
+      validApplication().gitWorkflow,
+      fakeTurnstileToken,
+      fakeTurnstileSecret,
+      JSON.stringify(validApplication()),
+    ]) {
+      expect(message.text).not.toContain(forbidden);
+      expect(message.html).not.toContain(forbidden);
+    }
+  });
+
+  test("email failure keeps public 201 response and persisted records", async () => {
+    const emailBinding = createEmailBinding(async () => {
+      const error = new Error("raw delivery error with applicant details");
+      (error as Error & { code: string }).code = "E_DELIVERY_FAILED";
+      throw error;
+    });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { response, waitUntilPromises } = await fetchWorkerWithWaitUntil(
+      jsonRequest(validApplication()),
+      createEnv({ PRIVATE_BETA_EMAIL: emailBinding }),
+    );
+    const body = await readJson(response);
+
+    expect(response.status).toBe(201);
+    expect(Object.keys(body).sort()).toEqual([
+      "applicationReference",
+      "status",
+      "submittedAt",
+    ]);
+    await Promise.all(waitUntilPromises);
+    expect(await applicationCount()).toBe(1);
+    expect(await historyCount()).toBe(1);
+    expect(errorSpy).toHaveBeenCalledOnce();
+
+    const logLine = String(errorSpy.mock.calls[0]![0]);
+    expect(logLine).toContain(String(body.applicationReference));
+    expect(logLine).toContain("E_DELIVERY_FAILED");
+    expect(logLine).not.toContain("evaluator@example.invalid");
+    expect(logLine).not.toContain("Test Evaluator");
+    expect(logLine).not.toContain(validApplication().difficultChange);
+    expect(logLine).not.toContain(fakeTurnstileToken);
+    expect(logLine).not.toContain(fakeTurnstileSecret);
+    expect(logLine).not.toContain("raw delivery error");
+
+    errorSpy.mockRestore();
+  });
+
+  test("duplicate application response does not send another notification", async () => {
+    const emailBinding = createEmailBinding();
+    const first = await fetchWorker(
+      jsonRequest(validApplication()),
+      createEnv({ PRIVATE_BETA_EMAIL: emailBinding }),
+    );
+    const second = await fetchWorker(
+      jsonRequest(validApplication({ workEmail: "evaluator@example.invalid" })),
+      createEnv({ PRIVATE_BETA_EMAIL: emailBinding }),
+    );
+
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(409);
+    expect(emailBinding.send).toHaveBeenCalledOnce();
+    expect(await applicationCount()).toBe(1);
+    expect(await historyCount()).toBe(1);
   });
 });
 

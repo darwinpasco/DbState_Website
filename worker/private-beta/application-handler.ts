@@ -9,6 +9,10 @@ import {
 } from "./application-repository";
 import { persistApplication } from "./application-repository";
 import { validateApplicationRequest } from "./application-validation";
+import {
+  sendPrivateBetaApplicationNotification,
+  type NotificationEnv,
+} from "./application-notification";
 import { errorResponse, jsonResponse } from "./http-responses";
 import {
   validateTurnstileToken,
@@ -20,7 +24,11 @@ export interface AssetFetcherLike {
   fetch(request: Request): Response | Promise<Response>;
 }
 
-export interface WorkerEnv extends TurnstileEnv {
+export interface ExecutionContextLike {
+  waitUntil(promise: Promise<unknown>): void;
+}
+
+export interface WorkerEnv extends TurnstileEnv, NotificationEnv {
   ASSETS: AssetFetcherLike;
   PRIVATE_BETA_INTAKE_MODE?: string;
   PRIVATE_BETA_DB?: D1DatabaseLike;
@@ -93,6 +101,7 @@ async function readJsonRequestBody(request: Request) {
 export async function handlePrivateBetaApplication(
   request: Request,
   env: WorkerEnv,
+  ctx?: ExecutionContextLike,
 ) {
   if (request.method !== "POST") {
     const response = errorResponse(
@@ -184,6 +193,19 @@ export async function handlePrivateBetaApplication(
       env.PRIVATE_BETA_DB,
       validation.value,
     );
+
+    const notification = sendPrivateBetaApplicationNotification(env, {
+      applicationReference: persisted.applicationReference,
+      application: validation.value,
+      submittedAt: persisted.submittedAt,
+      retentionUntil: persisted.retentionUntil,
+    });
+
+    if (ctx) {
+      ctx.waitUntil(notification);
+    } else {
+      await notification;
+    }
 
     return jsonResponse(
       {

@@ -2,7 +2,7 @@
 
 This document describes the versioned backend contract for future DbState Private Beta application intake.
 
-The public website form remains closed by default. Browser submission is wired only for focused test-mode builds and future enabled builds. No email is sent. The Worker API requires server-side Cloudflare Turnstile validation before persistence when intake is in `test` or future `enabled` mode. Production and preview D1 database IDs are configured in `wrangler.jsonc`, and the initial migration has been verified separately. Public intake is still disabled.
+The public website form remains closed by default. Browser submission is wired only for focused test-mode builds and future enabled builds. After a future valid application is durably persisted, the Worker schedules one minimal internal notification email. The Worker API requires server-side Cloudflare Turnstile validation before persistence when intake is in `test` or future `enabled` mode. Production and preview D1 database IDs are configured in `wrangler.jsonc`, and the initial migration has been verified separately. Public intake is still disabled.
 
 ## Endpoint
 
@@ -188,6 +188,26 @@ In test mode with a D1 binding, a valid request returns:
 
 The response does not return internal IDs, applicant email, D1 metadata, applicant answers, SQL details, or status-history IDs.
 
+After the response is prepared, the Worker schedules an internal notification email through the `PRIVATE_BETA_EMAIL` binding. The public response remains unchanged.
+
+Notification delivery occurs only after the application row and initial status-history row are persisted. A notification failure does not roll back persistence, does not change the public `201` response, and does not create an automatic retry in this slice.
+
+The internal notification is sent from `private-beta@dbstate.com` to `darwin@dbstate.com` and includes only:
+
+- Application reference
+- Applicant name
+- Work email
+- Company, team, or project
+- Role
+- First workflow selected
+- PostgreSQL versions
+- Submission timestamp
+- Retention date
+
+It does not include difficult-change narratives, schema-change process, reference-data process, release SQL process, evaluation goals, Git workflow narrative, customer data, Turnstile details, consent wording, or the full applicant record.
+
+No applicant acknowledgment email is sent in this slice.
+
 ## Error Response
 
 All API errors use this shape:
@@ -293,7 +313,7 @@ The D1 schema does not store:
 
 ## Later Work Required Before Enabling Intake
 
-Before public intake can be enabled, later reviewed slices must switch both Worker and public page modes through the deployment process, install the production Turnstile secret, run deployment validation, add notification email if approved, and update operational privacy documentation.
+Before public intake can be enabled, later reviewed slices must switch both Worker and public page modes through the deployment process, install the production Turnstile secret, verify Cloudflare Email Service readiness, and run deployment validation.
 
 The public Privacy page and privacy operations runbook now document the applicant data lifecycle. Future activation work still must verify operational privacy handling before public application submission starts.
 

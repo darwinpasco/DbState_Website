@@ -80,6 +80,18 @@ if (config.vars?.PRIVATE_BETA_INTAKE_MODE !== "disabled") {
   fail("PRIVATE_BETA_INTAKE_MODE must remain disabled.");
 }
 
+if (config.vars?.PRIVATE_BETA_NOTIFICATION_TO !== "darwin@dbstate.com") {
+  fail("PRIVATE_BETA_NOTIFICATION_TO must remain darwin@dbstate.com.");
+}
+
+if (config.vars?.PRIVATE_BETA_EMAIL_FROM !== "private-beta@dbstate.com") {
+  fail("PRIVATE_BETA_EMAIL_FROM must remain private-beta@dbstate.com.");
+}
+
+if (config.vars?.PRIVATE_BETA_EMAIL_REPLY_TO !== "darwin@dbstate.com") {
+  fail("PRIVATE_BETA_EMAIL_REPLY_TO must remain darwin@dbstate.com.");
+}
+
 if (config.vars?.TURNSTILE_SITE_KEY !== "0x4AAAAAAD7ybcKG7AdVbfGm") {
   fail("TURNSTILE_SITE_KEY must match the provisioned public sitekey.");
 }
@@ -164,4 +176,32 @@ if (forbiddenBindings.has(privateBetaDb.binding)) {
   fail(`Generated binding ${privateBetaDb.binding} must not be present.`);
 }
 
-console.log("wrangler.jsonc D1 and routing configuration is valid.");
+const emailBindings = config.send_email;
+if (!Array.isArray(emailBindings) || emailBindings.length !== 1) {
+  fail("Exactly one send_email binding is required.");
+}
+
+const [privateBetaEmail] = emailBindings;
+if (privateBetaEmail.name !== "PRIVATE_BETA_EMAIL") {
+  fail("Email binding name must remain PRIVATE_BETA_EMAIL.");
+}
+
+if (privateBetaEmail.destination_address !== "darwin@dbstate.com") {
+  fail("Email binding destination_address must remain darwin@dbstate.com.");
+}
+
+if (
+  !Array.isArray(privateBetaEmail.allowed_sender_addresses) ||
+  privateBetaEmail.allowed_sender_addresses.length !== 1 ||
+  privateBetaEmail.allowed_sender_addresses[0] !== "private-beta@dbstate.com"
+) {
+  fail(
+    "Email binding allowed_sender_addresses must contain only private-beta@dbstate.com.",
+  );
+}
+
+if ("remote" in privateBetaEmail) {
+  fail("Email binding must not include remote.");
+}
+
+console.log("wrangler.jsonc D1, email, and routing configuration is valid.");
