@@ -72,16 +72,79 @@ Do not run deletion commands without a reviewed operational request. Do not incl
 
 ## Retention Review
 
-A future scheduled retention process should:
+Automated retention enforcement is implemented but remains disabled in the
+committed production configuration:
 
-- Select records where `retention_until <= current UTC time`
+```text
+PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE=disabled
+```
+
+Configured schedule:
+
+```text
+17 3 * * *
+Daily at 03:17 UTC
+```
+
+Candidate rule:
+
+```text
+retention_until <= scheduled cutoff
+```
+
+Batch boundary:
+
+```text
+100 applications per invocation
+```
+
+Deletion order:
+
+1. Status-history rows
+2. Application rows
+
+The scheduled process uses one D1 batch for the selected candidates. Rollback on
+any failure is required, and partial deletion is not accepted.
+
+The scheduled process must:
+
+- Use the scheduled event time as the cutoff
 - Exclude records under an approved legal or operational hold
 - Delete status history and application rows atomically
 - Record counts without recording applicant answers
 - Produce failure evidence
 - Never email applicant content in logs
 
-Automated retention enforcement is not implemented in this slice.
+Automated retention enforcement is not deployed or enabled in this slice.
+
+## Retention Extension
+
+A reviewed hold is represented operationally by extending the existing
+`retention_until` value to an approved future UTC date. This is not a legal-hold
+management system.
+
+Before extending retention:
+
+1. Verify the application identity.
+2. Record the reviewed reason outside applicant-content logs.
+3. Confirm the approved new retention date.
+4. Use parameterized SQL.
+5. Update `updated_at`.
+6. Verify the updated record before the next scheduled run.
+
+Do not add a convenience endpoint for retention extensions in this slice.
+
+## Retention Monitoring
+
+Operational monitoring should review:
+
+- Cron event outcome
+- Safe count logs
+- Failed scheduled runs
+- Unexpected Cron classifications
+
+Investigate failed runs without printing applicant answers. Keep intake disabled
+during unresolved material retention failures.
 
 ## Internal Notification Email
 

@@ -103,7 +103,18 @@ In managed local environments where Wrangler cannot write logs under the user pr
 
 Application rows include a `retention_until` value assigned 365 days after submission. The retention date is metadata for operational lifecycle handling.
 
-Automated retention enforcement is not implemented in this slice. Public intake remains disabled while retention enforcement and other operational controls are reviewed.
+Automated retention enforcement is implemented as a disabled scheduled Worker path. No new migration is required; the existing `retention_until` index supports candidate selection.
+
+The scheduled process remains disabled in committed configuration:
+
+```text
+PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE=disabled
+PRIVATE_BETA_RETENTION_BATCH_SIZE=100
+```
+
+Remote preview and production databases are not modified by this branch. Future activation must explicitly change retention mode through reviewed deployment configuration.
+
+Manual deletion remains available for verified privacy requests through the reviewed process in the privacy operations runbook.
 
 Applicant privacy operations, including lookup, correction, deletion, retention review, and incident-handling boundaries, are documented in [Private Beta Privacy Operations](./private-beta-privacy-operations.md).
 

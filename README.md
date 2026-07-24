@@ -145,8 +145,46 @@ Applicant privacy operations are documented in
 `docs/private-beta-privacy-operations.md`.
 
 The D1 schema records `retention_until` metadata, but automated retention
-enforcement is deferred while public application intake remains closed. Privacy
-questions and requests may be sent to `darwin@dbstate.com`.
+enforcement now exists as a disabled scheduled Worker path. Privacy questions
+and requests may be sent to `darwin@dbstate.com`.
+
+## Retention Enforcement
+
+The Worker includes a scheduled retention handler for expired Private Beta
+application records. The configured Cron Trigger is:
+
+```text
+17 3 * * *
+```
+
+This runs daily at `03:17 UTC` when deployed and enabled. The committed
+production configuration remains disabled:
+
+```text
+PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE=disabled
+PRIVATE_BETA_RETENTION_BATCH_SIZE=100
+```
+
+When disabled, scheduled execution logs a safe no-op classification and does
+not query D1, delete records, or send email. Test and future enabled modes use
+the scheduled event time as the retention cutoff and process at most one bounded
+batch of 100 applications per invocation.
+
+Local scheduled-event testing can be run without remote mode:
+
+```sh
+npm run build
+npm run dev:scheduled
+```
+
+Then invoke the scheduled handler from another console:
+
+```sh
+curl.exe "http://127.0.0.1:8787/cdn-cgi/handler/scheduled?cron=17+3+*+*+*&format=json"
+```
+
+The committed disabled mode should produce a safe no-op. Worker tests cover
+local simulated D1 retention behavior; they do not delete remote records.
 
 ## Turnstile Operations
 
@@ -428,7 +466,8 @@ The production Turnstile secret remains uninstalled. Email notification from
 - Remote D1 production and preview IDs are configured, but migrations are not
   applied by this task.
 - The public Privacy page and applicant privacy runbook are present, but
-  automated retention enforcement is not implemented.
+  automated retention enforcement remains disabled until application intake is
+  activated and operationally verified.
 - Server-side Turnstile validation is implemented for the Worker API, and the
   browser widget is wired for test-mode and future enabled builds. Production
   secret installation is deferred.

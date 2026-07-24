@@ -9,6 +9,11 @@ import {
   TURNSTILE_EXPECTED_ACTION,
 } from "../../worker/private-beta/application-contract";
 import type { WorkerEnv } from "../../worker/private-beta/application-handler";
+import {
+  RETENTION_CRON,
+  RETENTION_RUN_LOG,
+  type ScheduledControllerLike,
+} from "../../worker/private-beta/application-retention";
 import type {
   D1DatabaseLike,
   D1PreparedStatementLike,
@@ -108,6 +113,8 @@ function createEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
     PRIVATE_BETA_EMAIL_FROM: "private-beta@dbstate.com",
     PRIVATE_BETA_EMAIL_REPLY_TO: "darwin@dbstate.com",
     PRIVATE_BETA_INTAKE_MODE: "test",
+    PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE: "test",
+    PRIVATE_BETA_RETENTION_BATCH_SIZE: "100",
     TURNSTILE_EXPECTED_ACTION,
     TURNSTILE_EXPECTED_HOSTNAMES: "dbstate.com,www.dbstate.com",
     TURNSTILE_SECRET_KEY: fakeTurnstileSecret,
@@ -166,6 +173,137 @@ async function historyCount() {
     "SELECT COUNT(*) AS count FROM private_beta_application_status_history",
   ).first<{ count: number }>();
   return Number(row?.count ?? 0);
+}
+
+async function applicationIds() {
+  const rows = await env.PRIVATE_BETA_DB.prepare(
+    "SELECT application_id FROM private_beta_applications ORDER BY retention_until ASC, application_id ASC",
+  ).all<{ application_id: string }>();
+  return rows.results.map((row) => row.application_id);
+}
+
+async function insertSyntheticApplication(options: {
+  applicationId?: string;
+  applicationReference?: string;
+  normalizedEmail?: string;
+  retentionUntil: string;
+  status?: string;
+  submittedAt?: string;
+  historyRows?: number;
+}) {
+  const applicationId = options.applicationId ?? crypto.randomUUID();
+  const submittedAt = options.submittedAt ?? "2025-01-01T00:00:00.000Z";
+  const normalizedEmail =
+    options.normalizedEmail ??
+    `${applicationId.replaceAll("-", "")}@example.invalid`;
+  const applicationReference =
+    options.applicationReference ??
+    `DBS-PB-${crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase()}`;
+  const status = options.status ?? "new";
+  const historyRows = options.historyRows ?? 1;
+
+  await env.PRIVATE_BETA_DB.prepare(
+    `INSERT INTO private_beta_applications (
+      application_id,
+      application_reference,
+      full_name,
+      work_email,
+      normalized_email,
+      company_team_project,
+      role,
+      postgresql_versions,
+      windows_version,
+      schema_change_process,
+      reference_data_process,
+      database_reviewers,
+      release_sql_process,
+      difficult_change,
+      first_workflow,
+      important_object_types,
+      manages_reference_data_in_git,
+      evaluation_goals,
+      processing_consent,
+      future_updates_opt_in,
+      consent_version,
+      status,
+      submission_bucket,
+      source,
+      submitted_at,
+      updated_at,
+      retention_until
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+    .bind(
+      applicationId,
+      applicationReference,
+      "Retention Test Applicant",
+      normalizedEmail,
+      normalizedEmail,
+      "Retention test project",
+      "Database engineer",
+      "PostgreSQL 16",
+      "Windows 11",
+      "Synthetic schema-change process for retention tests.",
+      "Synthetic reference-data process for retention tests.",
+      "Synthetic reviewers",
+      "Synthetic release SQL process for retention tests.",
+      "Synthetic difficult change narrative for retention tests.",
+      "schema-repository-to-database",
+      "Tables and reference data",
+      "partially",
+      "Synthetic retention evaluation goals.",
+      1,
+      0,
+      CONSENT_VERSION,
+      status,
+      20_100,
+      "website",
+      submittedAt,
+      submittedAt,
+      options.retentionUntil,
+    )
+    .run();
+
+  for (let index = 0; index < historyRows; index += 1) {
+    await env.PRIVATE_BETA_DB.prepare(
+      `INSERT INTO private_beta_application_status_history (
+        status_history_id,
+        application_id,
+        status,
+        changed_at,
+        changed_by,
+        note
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        crypto.randomUUID(),
+        applicationId,
+        status,
+        submittedAt,
+        "system",
+        "Synthetic status history",
+      )
+      .run();
+  }
+
+  return applicationId;
+}
+
+async function runScheduled(
+  testEnv = createEnv(),
+  overrides: Partial<ScheduledControllerLike> = {},
+) {
+  const controller: ScheduledControllerLike = {
+    cron: RETENTION_CRON,
+    scheduledTime: Date.parse("2026-07-24T03:17:00.000Z"),
+    ...overrides,
+  };
+
+  await worker.scheduled(controller, testEnv, {
+    waitUntil: (promise: Promise<unknown>) => {
+      void promise;
+    },
+  });
 }
 
 describe("private beta application routing", () => {
@@ -779,6 +917,379 @@ describe("private beta notification email", () => {
     expect(emailBinding.send).toHaveBeenCalledOnce();
     expect(await applicationCount()).toBe(1);
     expect(await historyCount()).toBe(1);
+  });
+});
+
+describe("private beta scheduled retention", () => {
+  test("disabled mode logs a safe no-op without D1 queries or email", async () => {
+    const emailBinding = createEmailBinding();
+    const db: D1DatabaseLike = {
+      prepare: vi.fn(() => {
+        throw new Error("D1 should not be queried");
+      }),
+      batch: vi.fn(async () => []),
+    };
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+    await runScheduled(
+      createEnv({
+        PRIVATE_BETA_DB: db,
+        PRIVATE_BETA_EMAIL: emailBinding,
+        PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE: "disabled",
+      }),
+    );
+
+    expect(db.prepare).not.toHaveBeenCalled();
+    expect(db.batch).not.toHaveBeenCalled();
+    expect(emailBinding.send).not.toHaveBeenCalled();
+    expect(infoSpy).toHaveBeenCalledWith(
+      RETENTION_RUN_LOG,
+      expect.objectContaining({
+        classification: "disabled",
+        scheduledAt: "2026-07-24T03:17:00.000Z",
+      }),
+    );
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      "Retention Test Applicant",
+    );
+
+    infoSpy.mockRestore();
+  });
+
+  test("unexpected cron logs safely without D1 queries or deletion", async () => {
+    const db: D1DatabaseLike = {
+      prepare: vi.fn(() => {
+        throw new Error("D1 should not be queried");
+      }),
+      batch: vi.fn(async () => []),
+    };
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+    await runScheduled(
+      createEnv({
+        PRIVATE_BETA_DB: db,
+        PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE: "test",
+      }),
+      { cron: "0 * * * *" },
+    );
+
+    expect(db.prepare).not.toHaveBeenCalled();
+    expect(db.batch).not.toHaveBeenCalled();
+    expect(infoSpy).toHaveBeenCalledWith(
+      RETENTION_RUN_LOG,
+      expect.objectContaining({
+        classification: "unexpected_cron",
+        scheduledAt: "2026-07-24T03:17:00.000Z",
+      }),
+    );
+
+    infoSpy.mockRestore();
+  });
+
+  test.each([
+    ["missing mode", { PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE: undefined }],
+    ["invalid mode", { PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE: "active" }],
+    ["missing batch", { PRIVATE_BETA_RETENTION_BATCH_SIZE: undefined }],
+    ["nonnumeric batch", { PRIVATE_BETA_RETENTION_BATCH_SIZE: "many" }],
+    ["zero batch", { PRIVATE_BETA_RETENTION_BATCH_SIZE: "0" }],
+    ["negative batch", { PRIVATE_BETA_RETENTION_BATCH_SIZE: "-1" }],
+    ["decimal batch", { PRIVATE_BETA_RETENTION_BATCH_SIZE: "1.5" }],
+    ["large batch", { PRIVATE_BETA_RETENTION_BATCH_SIZE: "501" }],
+  ])(
+    "%s fails safely without applicant content",
+    async (_caseName, envPatch) => {
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      await expect(
+        runScheduled(
+          createEnv({
+            PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE: "test",
+            PRIVATE_BETA_RETENTION_BATCH_SIZE: "100",
+            ...envPatch,
+          }),
+        ),
+      ).rejects.toThrow();
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        RETENTION_RUN_LOG,
+        expect.objectContaining({
+          classification: "configuration_failed",
+        }),
+      );
+      expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(
+        "Retention Test Applicant",
+      );
+
+      errorSpy.mockRestore();
+    },
+  );
+
+  test("no due candidates completes with zero counts and no email", async () => {
+    const emailBinding = createEmailBinding();
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+    await insertSyntheticApplication({
+      retentionUntil: "2026-07-24T03:17:00.001Z",
+    });
+    await runScheduled(createEnv({ PRIVATE_BETA_EMAIL: emailBinding }));
+
+    expect(await applicationCount()).toBe(1);
+    expect(await historyCount()).toBe(1);
+    expect(emailBinding.send).not.toHaveBeenCalled();
+    expect(infoSpy).toHaveBeenCalledWith(
+      RETENTION_RUN_LOG,
+      expect.objectContaining({
+        classification: "completed",
+        candidateCount: 0,
+        deletedApplicationCount: 0,
+        deletedHistoryCount: 0,
+        moreDueRecords: false,
+      }),
+    );
+
+    infoSpy.mockRestore();
+  });
+
+  test("due records are deleted by scheduled cutoff and future records remain", async () => {
+    const statuses = [
+      "new",
+      "reviewing",
+      "contacted",
+      "accepted",
+      "waitlisted",
+      "declined",
+      "withdrawn",
+    ];
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+    for (const status of statuses) {
+      await insertSyntheticApplication({
+        applicationId: `00000000-0000-4000-8000-${status.padEnd(12, "0").slice(0, 12)}`,
+        retentionUntil: "2026-07-24T03:17:00.000Z",
+        status,
+        historyRows: 2,
+      });
+    }
+    const futureId = await insertSyntheticApplication({
+      applicationId: "00000000-0000-4000-8000-999999999999",
+      retentionUntil: "2026-07-24T03:17:00.001Z",
+    });
+
+    await runScheduled(createEnv());
+
+    expect(await applicationCount()).toBe(1);
+    expect(await historyCount()).toBe(1);
+    expect(await applicationIds()).toEqual([futureId]);
+    expect(infoSpy).toHaveBeenCalledWith(
+      RETENTION_RUN_LOG,
+      expect.objectContaining({
+        classification: "completed",
+        candidateCount: 7,
+        deletedApplicationCount: 7,
+        deletedHistoryCount: 14,
+        moreDueRecords: false,
+      }),
+    );
+
+    infoSpy.mockRestore();
+  });
+
+  test("scheduled cutoff comes from controller scheduledTime, not machine time", async () => {
+    await insertSyntheticApplication({
+      retentionUntil: "2026-07-25T00:00:00.000Z",
+    });
+
+    await runScheduled(createEnv(), {
+      scheduledTime: Date.parse("2026-07-24T03:17:00.000Z"),
+    });
+
+    expect(await applicationCount()).toBe(1);
+
+    await runScheduled(createEnv(), {
+      scheduledTime: Date.parse("2026-07-25T03:17:00.000Z"),
+    });
+
+    expect(await applicationCount()).toBe(0);
+  });
+
+  test("batch size bounds selection and leaves remaining records for next run", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    const ids = [
+      await insertSyntheticApplication({
+        applicationId: "00000000-0000-4000-8000-000000000001",
+        retentionUntil: "2026-07-20T00:00:00.000Z",
+      }),
+      await insertSyntheticApplication({
+        applicationId: "00000000-0000-4000-8000-000000000002",
+        retentionUntil: "2026-07-21T00:00:00.000Z",
+      }),
+      await insertSyntheticApplication({
+        applicationId: "00000000-0000-4000-8000-000000000003",
+        retentionUntil: "2026-07-22T00:00:00.000Z",
+      }),
+    ];
+
+    await runScheduled(createEnv({ PRIVATE_BETA_RETENTION_BATCH_SIZE: "2" }));
+
+    expect(await applicationIds()).toEqual([ids[2]]);
+    expect(infoSpy).toHaveBeenCalledWith(
+      RETENTION_RUN_LOG,
+      expect.objectContaining({
+        candidateCount: 2,
+        deletedApplicationCount: 2,
+        moreDueRecords: true,
+      }),
+    );
+
+    infoSpy.mockRestore();
+  });
+
+  test("retention extension before deletion batch prevents parent and history deletion", async () => {
+    type RetentionRecord = {
+      applicationId: string;
+      retentionUntil: string;
+      historyCount: number;
+    };
+    class FakeStatement implements D1PreparedStatementLike {
+      values: (string | number | null)[] = [];
+
+      constructor(
+        readonly query: string,
+        private readonly records: RetentionRecord[],
+      ) {}
+
+      bind(...values: (string | number | null)[]) {
+        this.values = values;
+        return this;
+      }
+
+      async first<T>() {
+        return { count: this.records.length } as T;
+      }
+
+      async all<T>() {
+        return {
+          results: this.records.map((record) => ({
+            application_id: record.applicationId,
+          })) as T[],
+        };
+      }
+
+      async run() {
+        return {};
+      }
+    }
+    const record = {
+      applicationId: "due-record",
+      retentionUntil: "2026-07-01T00:00:00.000Z",
+      historyCount: 1,
+    };
+    const records = [record];
+    const db: D1DatabaseLike = {
+      prepare: (query) => new FakeStatement(query, records),
+      batch: async (statements) => {
+        record.retentionUntil = "2026-08-01T00:00:00.000Z";
+
+        return statements.map((statement) => {
+          const fake = statement as FakeStatement;
+          const applicationId = String(fake.values[0]);
+          const cutoff = String(fake.values[1]);
+          const matched = records.find(
+            (item) =>
+              item.applicationId === applicationId &&
+              item.retentionUntil <= cutoff,
+          );
+
+          if (!matched) {
+            return { meta: { changes: 0 } };
+          }
+
+          if (fake.query.includes("status_history")) {
+            const changes = matched.historyCount;
+            matched.historyCount = 0;
+            return { meta: { changes } };
+          }
+
+          records.splice(records.indexOf(matched), 1);
+          return { meta: { changes: 1 } };
+        });
+      },
+    };
+
+    await runScheduled(createEnv({ PRIVATE_BETA_DB: db }));
+
+    expect(records).toEqual([
+      {
+        applicationId: "due-record",
+        retentionUntil: "2026-08-01T00:00:00.000Z",
+        historyCount: 1,
+      },
+    ]);
+  });
+
+  test("batch failure logs safely and leaves records for retry", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    await insertSyntheticApplication({
+      applicationReference: "DBS-PB-SECRETREF1",
+      normalizedEmail: "secret-applicant@example.invalid",
+      retentionUntil: "2026-07-01T00:00:00.000Z",
+    });
+    const realDb = env.PRIVATE_BETA_DB;
+    const failingDb: D1DatabaseLike = {
+      prepare: (query) => realDb.prepare(query),
+      batch: async () => {
+        throw new Error("raw D1 failure with secret-applicant@example.invalid");
+      },
+    };
+
+    await expect(
+      runScheduled(createEnv({ PRIVATE_BETA_DB: failingDb })),
+    ).rejects.toThrow();
+
+    expect(await applicationCount()).toBe(1);
+    expect(await historyCount()).toBe(1);
+    const logText = JSON.stringify(errorSpy.mock.calls);
+    expect(logText).toContain("failed");
+    expect(logText).not.toContain("secret-applicant@example.invalid");
+    expect(logText).not.toContain("DBS-PB-SECRETREF1");
+    expect(logText).not.toContain("raw D1 failure");
+
+    errorSpy.mockRestore();
+  });
+
+  test("retention logs contain only approved counts and classifications", async () => {
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+    const applicationId = await insertSyntheticApplication({
+      applicationReference: "DBS-PB-PRIVACY01",
+      normalizedEmail: "privacy-log@example.invalid",
+      retentionUntil: "2026-07-01T00:00:00.000Z",
+    });
+
+    await runScheduled(createEnv());
+
+    const logText = JSON.stringify(infoSpy.mock.calls);
+    expect(logText).toContain("completed");
+    expect(logText).toContain("candidateCount");
+    expect(logText).toContain("deletedApplicationCount");
+    expect(logText).not.toContain("Retention Test Applicant");
+    expect(logText).not.toContain("privacy-log@example.invalid");
+    expect(logText).not.toContain("DBS-PB-PRIVACY01");
+    expect(logText).not.toContain(applicationId);
+    expect(logText).not.toContain("Synthetic difficult change narrative");
+    expect(logText).not.toContain(fakeTurnstileToken);
+
+    infoSpy.mockRestore();
+  });
+
+  test("retention never sends a new-application notification", async () => {
+    const emailBinding = createEmailBinding();
+    await insertSyntheticApplication({
+      retentionUntil: "2026-07-01T00:00:00.000Z",
+    });
+
+    await runScheduled(createEnv({ PRIVATE_BETA_EMAIL: emailBinding }));
+
+    expect(emailBinding.send).not.toHaveBeenCalled();
   });
 });
 

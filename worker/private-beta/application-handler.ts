@@ -13,6 +13,7 @@ import {
   sendPrivateBetaApplicationNotification,
   type NotificationEnv,
 } from "./application-notification";
+import type { RetentionEnv } from "./application-retention";
 import { errorResponse, jsonResponse } from "./http-responses";
 import {
   validateTurnstileToken,
@@ -28,7 +29,7 @@ export interface ExecutionContextLike {
   waitUntil(promise: Promise<unknown>): void;
 }
 
-export interface WorkerEnv extends TurnstileEnv, NotificationEnv {
+export interface WorkerEnv extends TurnstileEnv, NotificationEnv, RetentionEnv {
   ASSETS: AssetFetcherLike;
   PRIVATE_BETA_INTAKE_MODE?: string;
   PRIVATE_BETA_DB?: D1DatabaseLike;

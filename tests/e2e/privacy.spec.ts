@@ -19,7 +19,7 @@ test("privacy page discloses applicant data lifecycle without unsupported claims
     "The APAC operating region is not presented as a legally guaranteed data-residency commitment.",
   );
   await expect(body).toContainText(
-    "Automated retention enforcement is being implemented before public intake is enabled. Until then, public application intake remains closed.",
+    "Automated retention enforcement has been implemented but remains disabled until the Private Beta application process is activated and operationally verified. Public application intake remains closed.",
   );
   await expect(body).toContainText(
     "No security measure can guarantee that an incident will never occur.",

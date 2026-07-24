@@ -92,6 +92,14 @@ if (config.vars?.PRIVATE_BETA_EMAIL_REPLY_TO !== "darwin@dbstate.com") {
   fail("PRIVATE_BETA_EMAIL_REPLY_TO must remain darwin@dbstate.com.");
 }
 
+if (config.vars?.PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE !== "disabled") {
+  fail("PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE must remain disabled.");
+}
+
+if (config.vars?.PRIVATE_BETA_RETENTION_BATCH_SIZE !== "100") {
+  fail("PRIVATE_BETA_RETENTION_BATCH_SIZE must remain 100.");
+}
+
 if (config.vars?.TURNSTILE_SITE_KEY !== "0x4AAAAAAD7ybcKG7AdVbfGm") {
   fail("TURNSTILE_SITE_KEY must match the provisioned public sitekey.");
 }
@@ -204,4 +212,27 @@ if ("remote" in privateBetaEmail) {
   fail("Email binding must not include remote.");
 }
 
-console.log("wrangler.jsonc D1, email, and routing configuration is valid.");
+const crons = config.triggers?.crons;
+if (!Array.isArray(crons) || crons.length !== 1 || crons[0] !== "17 3 * * *") {
+  fail("Exactly one Cron Trigger is required: 17 3 * * *.");
+}
+
+const forbiddenTopLevelBindings = [
+  "kv_namespaces",
+  "r2_buckets",
+  "queues",
+  "durable_objects",
+  "workflows",
+  "ai",
+  "vectorize",
+];
+
+for (const key of forbiddenTopLevelBindings) {
+  if (key in config) {
+    fail(`${key} must not be configured for this Worker.`);
+  }
+}
+
+console.log(
+  "wrangler.jsonc D1, email, retention, Cron, and routing configuration is valid.",
+);
