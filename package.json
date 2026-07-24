@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node ./scripts/astro-command.mjs dev",
+    "dev:scheduled": "wrangler dev --test-scheduled --ip 127.0.0.1 --port 8787 --show-interactive-dev-session=false",
     "build": "node ./scripts/astro-command.mjs build",
     "preview": "npm run build && wrangler dev",
     "preview:astro": "node ./scripts/astro-command.mjs preview --host 127.0.0.1 --port 4321",

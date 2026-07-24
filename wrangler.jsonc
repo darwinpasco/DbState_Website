@@ -8,6 +8,8 @@
     "PRIVATE_BETA_NOTIFICATION_TO": "darwin@dbstate.com",
     "PRIVATE_BETA_EMAIL_FROM": "private-beta@dbstate.com",
     "PRIVATE_BETA_EMAIL_REPLY_TO": "darwin@dbstate.com",
+    "PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE": "disabled",
+    "PRIVATE_BETA_RETENTION_BATCH_SIZE": "100",
     "TURNSTILE_EXPECTED_ACTION": "private-beta-application",
     "TURNSTILE_EXPECTED_HOSTNAMES": "dbstate.com,www.dbstate.com",
     "TURNSTILE_SITE_KEY": "0x4AAAAAAD7ybcKG7AdVbfGm",
@@ -33,4 +35,7 @@
       "allowed_sender_addresses": ["private-beta@dbstate.com"],
     },
   ],
+  "triggers": {
+    "crons": ["17 3 * * *"],
+  },
 }

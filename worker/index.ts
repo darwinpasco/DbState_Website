@@ -4,6 +4,10 @@ import {
   type ExecutionContextLike,
   type WorkerEnv,
 } from "./private-beta/application-handler";
+import {
+  handlePrivateBetaRetentionScheduled,
+  type ScheduledControllerLike,
+} from "./private-beta/application-retention";
 import { errorResponse } from "./private-beta/http-responses";
 
 export default {
@@ -27,5 +31,13 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+
+  async scheduled(
+    controller: ScheduledControllerLike,
+    env: WorkerEnv,
+    _ctx?: ExecutionContextLike,
+  ): Promise<void> {
+    await handlePrivateBetaRetentionScheduled(controller, env);
   },
 };

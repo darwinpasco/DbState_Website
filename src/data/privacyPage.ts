@@ -167,7 +167,7 @@ export const privacySections: PrivacySection[] = [
       "The retention period applies to the application record and its status history. The retention date is stored with the application.",
       "Accepted applicants may later receive a separate onboarding notice for information needed during active participation. Records may be deleted earlier following an approved deletion request.",
       "Retention enforcement is an operational control and does not make recovery copies disappear instantly.",
-      "Automated retention enforcement is being implemented before public intake is enabled. Until then, public application intake remains closed.",
+      "Automated retention enforcement has been implemented but remains disabled until the Private Beta application process is activated and operationally verified. Public application intake remains closed.",
     ],
   },
   {

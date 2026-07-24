@@ -295,9 +295,11 @@ consent_version = private-beta-application-v1
 retention_until = submitted_at + 365 days
 ```
 
-This slice records the retention date only. It does not add scheduled deletion.
+Retention enforcement uses the stored `retention_until` value. Automated enforcement is implemented but remains disabled in committed production configuration.
 
-The public Privacy page states that Private Beta application records are assigned a retention date 365 days after submission. Automated retention enforcement remains deferred while public intake is closed.
+The public Privacy page states that Private Beta application records are assigned a retention date 365 days after submission. Automated retention enforcement remains disabled until the Private Beta application process is activated and operationally verified.
+
+Retention deletion does not change the request body, success response, error contract, duplicate rule, or Turnstile validation behavior. Retention deletion does not send applicant notifications.
 
 ## Stored Data Boundaries
 

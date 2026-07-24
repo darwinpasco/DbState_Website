@@ -126,6 +126,14 @@ handling are deferred.
 This slice does not send an applicant acknowledgment email. Only the internal
 notification to `darwin@dbstate.com` is implemented.
 
+## Retention Jobs
+
+Scheduled retention execution does not send new-application notifications and
+does not reuse the `PRIVATE_BETA_EMAIL` binding.
+
+Retention failure notification is deferred. Retention jobs log only safe count
+and classification data.
+
 ## Testing
 
 Worker tests use a deterministic fake email binding. Automated tests do not send
