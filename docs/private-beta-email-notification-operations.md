@@ -156,3 +156,21 @@ Before any enabled-intake deployment, the operator must verify:
 - Turnstile secret installation is complete through a reviewed path.
 
 Deployment remains deferred from this repository task.
+
+## Production Preflight
+
+The production preflight can include the restricted `PRIVATE_BETA_EMAIL`
+binding, but application intake remains disabled. While intake is disabled, the
+application endpoint returns before validation, persistence, and notification
+scheduling, so no application notification email should be sent.
+
+Before any later enabled-intake deployment, verify Email Service readiness:
+
+- `dbstate.com` sending domain onboarded
+- `private-beta@dbstate.com` permitted as sender
+- `darwin@dbstate.com` verified as destination
+- `wrangler.jsonc` still restricts the binding to the configured sender and
+  destination
+
+The production preflight does not send an applicant acknowledgment email and
+does not add notification retry or reconciliation.

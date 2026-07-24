@@ -35,6 +35,9 @@ jobs:
       - name: Run Private Beta client integration tests
         run: npm run test:e2e:private-beta-client
 
+      - name: Validate disabled production preflight build
+        run: npm run release:preflight:build
+
       - name: Validate Cloudflare static asset upload
         run: npx wrangler versions upload --dry-run
 

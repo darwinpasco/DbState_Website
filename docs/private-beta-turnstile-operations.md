@@ -34,6 +34,18 @@ TURNSTILE_SECRET_KEY
 
 Do not store the secret in `wrangler.jsonc`, README, tests, snapshots, local documentation, browser code, or GitHub Actions.
 
+`wrangler.jsonc` declares the required secret name only:
+
+```json
+{
+  "secrets": {
+    "required": ["TURNSTILE_SECRET_KEY"]
+  }
+}
+```
+
+This declaration does not store the secret value.
+
 ## Server-Side Validation
 
 The Worker validates every accepted application request through Cloudflare Siteverify before D1 persistence:
@@ -159,6 +171,11 @@ wrangler versions secret put TURNSTILE_SECRET_KEY
 ```
 
 Do not run either command from routine validation.
+
+Production preflight requires the operator to install or verify the secret name
+through a reviewed versioned-secret path before uploading a production Worker
+version. Do not use `wrangler secret put` for this rollout because it can create
+and immediately deploy a Worker version.
 
 ## Later Work Required
 
