@@ -99,6 +99,30 @@ Dry runs validate packaging and bindings without deploying or applying migration
 
 In managed local environments where Wrangler cannot write logs under the user profile, set `WRANGLER_LOG_PATH` to an ignored local directory such as `.wrangler/logs`.
 
+## Production Preflight
+
+Production preflight deployment does not require a new migration and must not
+apply remote migrations.
+
+Before and after a preflight deployment, an operator can verify the production
+empty state with a read-only query:
+
+```sql
+SELECT
+  (SELECT COUNT(*) FROM private_beta_applications) AS application_count,
+  (SELECT COUNT(*) FROM private_beta_application_status_history) AS history_count;
+```
+
+Expected before activation:
+
+```text
+application_count = 0
+history_count = 0
+```
+
+Do not run this query from CI or routine local validation. It is a reviewed
+operator check against remote D1.
+
 ## Retention and Privacy Operations
 
 Application rows include a `retention_until` value assigned 365 days after submission. The retention date is metadata for operational lifecycle handling.

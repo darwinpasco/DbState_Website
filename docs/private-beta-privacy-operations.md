@@ -4,6 +4,11 @@ This runbook documents operational handling for DbState Private Beta applicant d
 
 Public intake remains disabled. Do not deploy, apply migrations, install secrets, or run remote D1 write operations from routine website validation.
 
+Production preflight may publish the disabled public website and disabled Worker
+foundation. It must not enable intake, enable retention enforcement, delete
+remote D1 records, or send real email. See
+[Private Beta Production Preflight](./private-beta-production-preflight.md).
+
 ## Data Inventory
 
 Private Beta application records are stored in Cloudflare D1.
@@ -116,6 +121,11 @@ The scheduled process must:
 - Never email applicant content in logs
 
 Automated retention enforcement is not deployed or enabled in this slice.
+
+During production preflight, the scheduled handler and Cron configuration may be
+present after an operator-controlled deployment, but
+`PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE=disabled` must keep the run as a safe
+no-op before any D1 query.
 
 ## Retention Extension
 

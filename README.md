@@ -382,6 +382,54 @@ Public application intake remains disabled until a later reviewed slice changes
 both the Worker intake mode and public build mode, installs the production
 Turnstile secret, and completes the required Cloudflare operational steps.
 
+## Production Preflight
+
+The production preflight path is operator-controlled and keeps all write-capable
+production workflows disabled:
+
+```text
+PRIVATE_BETA_INTAKE_MODE=disabled
+PRIVATE_BETA_RETENTION_ENFORCEMENT_MODE=disabled
+PRIVATE_BETA_RETENTION_BATCH_SIZE=100
+PUBLIC_PRIVATE_BETA_INTAKE_MODE=disabled
+```
+
+Build and verify the disabled static output locally:
+
+```sh
+npm run release:preflight:build
+```
+
+The preflight build script rejects inherited public intake values other than
+`disabled`, runs the Astro production build with the public mode forced to
+`disabled`, confirms 15 static pages, verifies the closed Private Beta form, and
+checks the homepage hero social image in `dist/`.
+
+An operator may upload a reviewed Worker version without deployment:
+
+```sh
+npm run release:preflight:upload
+```
+
+This command uses `wrangler versions upload --strict` with the stable tag
+`private-beta-preflight`. Do not run it during routine validation. Deploying an
+uploaded version, deploying trigger configuration, installing secrets, and
+running remote D1 checks remain separate reviewed operator actions.
+
+After an operator-controlled deployment, verify the production preflight:
+
+```sh
+npm run release:preflight:verify
+```
+
+The verification script is read-only. It checks public routes, social metadata,
+the closed Private Beta page, the disabled API response, and Privacy wording.
+It does not write D1 records, send email, invoke scheduled retention, install
+secrets, or deploy.
+
+See `docs/private-beta-production-preflight.md` for the complete manual
+deployment, verification, and rollback runbook.
+
 Set `SITE_URL` before deployment so Astro can generate canonical URLs and Open Graph URLs:
 
 ```sh

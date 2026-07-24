@@ -39,6 +39,8 @@ Turnstile operations are documented in [Private Beta Turnstile Operations](./pri
 
 Applicant privacy handling is disclosed on the public `/privacy/` page and operationally documented in [Private Beta Privacy Operations](./private-beta-privacy-operations.md).
 
+The production preflight deployment runbook is documented in [Private Beta Production Preflight](./private-beta-production-preflight.md). That preflight keeps public intake disabled and verifies that the API returns `503 intake_disabled` before request parsing, Turnstile validation, D1 persistence, or email notification.
+
 ## Public Browser Mode
 
 The static Private Beta page has a separate build-time mode:
@@ -319,7 +321,7 @@ Before public intake can be enabled, later reviewed slices must switch both Work
 
 The public Privacy page and privacy operations runbook now document the applicant data lifecycle. Future activation work still must verify operational privacy handling before public application submission starts.
 
-This slice does not deploy and does not enable public application submission.
+Production preflight may publish the disabled API foundation. That does not enable public application submission, does not change the request contract, and should not create production D1 rows.
 
 ## Production migration evidence
 

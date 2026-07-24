@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 
 const configText = readFileSync("wrangler.jsonc", "utf8");
+const siteMetadataText = readFileSync("src/data/site.ts", "utf8");
+const astroConfigText = readFileSync("astro.config.mjs", "utf8");
 
 function stripJsonComments(text) {
   let output = "";
@@ -117,7 +119,22 @@ if ("TURNSTILE_SECRET_KEY" in (config.vars ?? {})) {
   fail("TURNSTILE_SECRET_KEY must not be stored in wrangler.jsonc vars.");
 }
 
-if ("secrets" in config && JSON.stringify(config.secrets).includes("0x")) {
+const requiredSecrets = config.secrets?.required;
+if (
+  !Array.isArray(requiredSecrets) ||
+  requiredSecrets.length !== 1 ||
+  requiredSecrets[0] !== "TURNSTILE_SECRET_KEY"
+) {
+  fail("secrets.required must contain only TURNSTILE_SECRET_KEY.");
+}
+
+if (Object.keys(config.secrets ?? {}).some((key) => key !== "required")) {
+  fail(
+    "wrangler.jsonc secrets configuration must contain only required names.",
+  );
+}
+
+if (JSON.stringify(config.secrets).includes("0x")) {
   fail("wrangler.jsonc secrets configuration must not include secret values.");
 }
 
@@ -233,6 +250,28 @@ for (const key of forbiddenTopLevelBindings) {
   }
 }
 
+if (!astroConfigText.includes('"https://dbstate.com"')) {
+  fail("Astro canonical site must remain https://dbstate.com.");
+}
+
+if (
+  !siteMetadataText.includes(
+    'defaultSocialImagePath: "/social/dbstate-home-hero-v1.png"',
+  )
+) {
+  fail(
+    "Default social image path must remain /social/dbstate-home-hero-v1.png.",
+  );
+}
+
+if (!siteMetadataText.includes("socialImageWidth: 1200")) {
+  fail("Default social image width must remain 1200.");
+}
+
+if (!siteMetadataText.includes("socialImageHeight: 630")) {
+  fail("Default social image height must remain 630.");
+}
+
 console.log(
-  "wrangler.jsonc D1, email, retention, Cron, and routing configuration is valid.",
+  "wrangler.jsonc D1, email, retention, Cron, required-secret, social metadata, and routing configuration is valid.",
 );
